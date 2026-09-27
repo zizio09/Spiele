@@ -499,6 +499,52 @@ button {
   font-weight: 600;
 }
 
+.vk-score {
+  width: min(640px, 100%);
+  display: grid;
+  gap: 0.4rem;
+}
+
+.vk-score__label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.vk-score__track {
+  height: 0.85rem;
+  border-radius: 999px;
+  background: rgba(20, 53, 40, 0.12);
+  overflow: hidden;
+  border: 1px solid var(--line);
+}
+
+.vk-score__fill {
+  height: 100%;
+  width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2f6b4f, #e8a317);
+  transition: width 0.45s ease;
+}
+
+.vk-score__fill.is-low {
+  background: linear-gradient(90deg, #c4840c, #e8a317);
+}
+
+.vk-score__fill.is-critical {
+  background: linear-gradient(90deg, #8f2a18, #c23b22);
+}
+
+.vk-score__warn {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--danger);
+  text-align: center;
+}
+
 .vk-title-row {
   display: flex;
   align-items: center;
@@ -703,8 +749,14 @@ button {
 
 .viererkette-page.vk--dark .game-header p,
 .viererkette-page.vk--dark .vk-legend,
-.viererkette-page.vk--dark .vk-mistakes {
+.viererkette-page.vk--dark .vk-mistakes,
+.viererkette-page.vk--dark .vk-score__label {
   color: #b8cfc3;
+}
+
+.viererkette-page.vk--dark .vk-score__track {
+  background: rgba(232, 240, 236, 0.12);
+  border-color: rgba(232, 240, 236, 0.2);
 }
 
 .viererkette-page.vk--dark .vk-tile {

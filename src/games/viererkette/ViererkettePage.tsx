@@ -110,11 +110,37 @@ export function ViererkettePage() {
         </div>
       )}
 
+      <div className="vk-score" aria-live="polite">
+        <div className="vk-score__label">
+          <span>Punkte</span>
+          <strong>
+            {state.points} / {START_POINTS}
+          </strong>
+        </div>
+        <div
+          className="vk-score__track"
+          role="progressbar"
+          aria-label={`Punkte: ${state.points} von ${START_POINTS}`}
+          aria-valuemin={0}
+          aria-valuemax={START_POINTS}
+          aria-valuenow={state.points}
+        >
+          <div
+            className={[
+              'vk-score__fill',
+              state.points <= 25 ? 'is-critical' : state.points <= 50 ? 'is-low' : '',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            style={{ width: `${(state.points / START_POINTS) * 100}%` }}
+          />
+        </div>
+        {state.status === 'playing' && remaining <= 1 && (
+          <p className="vk-score__warn">Letzter Versuch!</p>
+        )}
+      </div>
+
       <div className="vk-toolbar">
-        <p className="vk-mistakes" aria-live="polite">
-          Punkte: {state.points} · Fehlversuche: {state.mistakes} / {MAX_MISTAKES}
-          {state.status === 'playing' && remaining <= 1 ? ' · Letzter Versuch!' : ''}
-        </p>
         <button
           type="button"
           className="btn btn--ghost"
