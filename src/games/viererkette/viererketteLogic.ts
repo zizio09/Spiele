@@ -1,31 +1,62 @@
-import { VIERERKETTE_PUZZLES, type ViererkettePuzzle } from '../../data/viererkette/puzzles'
+import {
+  VIERERKETTE_PUZZLES,
+  type ViererketteDifficulty,
+  type ViererkettePuzzle,
+} from '../../data/viererkette/puzzles'
 import { dailyIndex, dailySeed, getBerlinDateString } from '../../lib/berlinDate'
 import { seededShuffle } from '../../lib/seededRandom'
-import { loadDailyProgress, saveJson } from '../../lib/storage'
+import { loadDailyProgress, loadJson, saveJson } from '../../lib/storage'
 
 export const VIERERKETTE_STORAGE_KEY = 'tagesrunde-viererkette'
-export const MAX_MISTAKES = 4
+export const VIERERKETTE_SETTINGS_KEY = 'tagesrunde-viererkette-settings'
+export const MAX_MISTAKES = 20
+export const POINTS_PER_MISTAKE = 5
+export const START_POINTS = 100
+
+export type FeedbackKind = 'one-off' | 'no-match' | 'correct' | null
 
 export interface SolvedGroup {
   category: string
+  explanation: string
+  difficulty: ViererketteDifficulty
   terms: string[]
 }
 
 export type ViererketteStatus = 'playing' | 'won' | 'lost'
 
+export interface GroupMeta {
+  category: string
+  explanation: string
+  difficulty: ViererketteDifficulty
+  terms: string[]
+}
+
 export interface ViererketteState {
   date: string
   puzzleId: string
-  /** Aktive Begriffe in Anzeigereihenfolge. */
   board: string[]
   selected: string[]
   solved: SolvedGroup[]
   mistakes: number
+  points: number
   status: ViererketteStatus
   message: string | null
-  /** Lösung: Kategorie → sortierte Begriffe */
-  solution: Record<string, string[]>
+  feedback: FeedbackKind
+  /** Kategorie → Metadaten inkl. sortierter Begriffe */
+  groups: Record<string, GroupMeta>
   shuffleCount: number
+}
+
+export type TermSize = 'klein' | 'normal' | 'gross'
+
+export interface ViererketteSettings {
+  darkMode: boolean
+  termSize: TermSize
+}
+
+export const DEFAULT_SETTINGS: ViererketteSettings = {
+  darkMode: false,
+  termSize: 'normal',
 }
 
 export function getDailyPuzzle(dateStr: string = getBerlinDateString()): ViererkettePuzzle {
@@ -33,12 +64,17 @@ export function getDailyPuzzle(dateStr: string = getBerlinDateString()): Viererk
   return VIERERKETTE_PUZZLES[idx]
 }
 
-function buildSolution(puzzle: ViererkettePuzzle): Record<string, string[]> {
-  const solution: Record<string, string[]> = {}
+function buildGroups(puzzle: ViererkettePuzzle): Record<string, GroupMeta> {
+  const groups: Record<string, GroupMeta> = {}
   for (const g of puzzle.groups) {
-    solution[g.category] = [...g.terms].sort()
+    groups[g.category] = {
+      category: g.category,
+      explanation: g.explanation,
+      difficulty: g.difficulty,
+      terms: [...g.terms].sort(),
+    }
   }
-  return solution
+  return groups
 }
 
 function allTerms(puzzle: ViererkettePuzzle): string[] {
@@ -56,18 +92,23 @@ export function createViererketteState(dateStr: string = getBerlinDateString()):
     selected: [],
     solved: [],
     mistakes: 0,
+    points: START_POINTS,
     status: 'playing',
     message: null,
-    solution: buildSolution(puzzle),
+    feedback: null,
+    groups: buildGroups(puzzle),
     shuffleCount: 0,
   }
 }
 
 export function loadViererketteState(dateStr: string = getBerlinDateString()): ViererketteState {
-  const saved = loadDailyProgress<ViererketteState>(VIERERKETTE_STORAGE_KEY, dateStr)
+  const saved = loadDailyProgress<ViererketteState & { solution?: Record<string, string[]> }>(
+    VIERERKETTE_STORAGE_KEY,
+    dateStr,
+  )
   const puzzle = getDailyPuzzle(dateStr)
-  if (saved && saved.puzzleId === puzzle.id) {
-    return { ...saved, message: null }
+  if (saved && saved.puzzleId === puzzle.id && saved.groups) {
+    return { ...saved, message: null, feedback: saved.feedback ?? null }
   }
   return createViererketteState(dateStr)
 }
@@ -75,6 +116,19 @@ export function loadViererketteState(dateStr: string = getBerlinDateString()): V
 export function persistViererketteState(state: ViererketteState): void {
   const { message: _m, ...rest } = state
   saveJson(VIERERKETTE_STORAGE_KEY, rest)
+}
+
+export function loadViererketteSettings(): ViererketteSettings {
+  const saved = loadJson<ViererketteSettings>(VIERERKETTE_SETTINGS_KEY)
+  if (!saved) return { ...DEFAULT_SETTINGS }
+  return {
+    darkMode: Boolean(saved.darkMode),
+    termSize: saved.termSize === 'klein' || saved.termSize === 'gross' ? saved.termSize : 'normal',
+  }
+}
+
+export function persistViererketteSettings(settings: ViererketteSettings): void {
+  saveJson(VIERERKETTE_SETTINGS_KEY, settings)
 }
 
 export function toggleSelect(state: ViererketteState, term: string): ViererketteState {
@@ -87,26 +141,49 @@ export function toggleSelect(state: ViererketteState, term: string): Viererkette
       ? [...state.selected, term]
       : state.selected
 
-  return { ...state, selected, message: null }
+  return { ...state, selected, message: null, feedback: null }
 }
 
-function findMatchingCategory(terms: string[], solution: Record<string, string[]>): string | null {
+export function clearSelection(state: ViererketteState): ViererketteState {
+  if (state.status !== 'playing') return state
+  return { ...state, selected: [], message: null, feedback: null }
+}
+
+function findMatchingCategory(terms: string[], groups: Record<string, GroupMeta>): string | null {
   const sorted = [...terms].sort()
-  for (const [category, group] of Object.entries(solution)) {
-    if (group.length === sorted.length && group.every((t, i) => t === sorted[i])) {
+  for (const [category, group] of Object.entries(groups)) {
+    if (group.terms.length === sorted.length && group.terms.every((t, i) => t === sorted[i])) {
       return category
     }
   }
   return null
 }
 
+/** Maximale Trefferanzahl zu einer ungelösten Gruppe. */
+export function bestOverlap(terms: string[], state: ViererketteState): number {
+  const selected = new Set(terms)
+  let best = 0
+  for (const [category, meta] of Object.entries(state.groups)) {
+    if (state.solved.some((s) => s.category === category)) continue
+    const overlap = meta.terms.filter((t) => selected.has(t)).length
+    if (overlap > best) best = overlap
+  }
+  return best
+}
+
 function autoCompleteLastGroup(state: ViererketteState): ViererketteState {
   if (state.board.length !== 4 || state.status !== 'playing') return state
-  const category = findMatchingCategory(state.board, state.solution)
+  const category = findMatchingCategory(state.board, state.groups)
   if (!category) return state
+  const meta = state.groups[category]
   const solved: SolvedGroup[] = [
     ...state.solved,
-    { category, terms: [...state.solution[category]] },
+    {
+      category,
+      explanation: meta.explanation,
+      difficulty: meta.difficulty,
+      terms: [...meta.terms],
+    },
   ]
   return {
     ...state,
@@ -114,6 +191,7 @@ function autoCompleteLastGroup(state: ViererketteState): ViererketteState {
     selected: [],
     solved,
     status: 'won',
+    feedback: 'correct',
     message: 'Alle Gruppen gefunden!',
   }
 }
@@ -121,14 +199,24 @@ function autoCompleteLastGroup(state: ViererketteState): ViererketteState {
 export function submitGroup(state: ViererketteState): ViererketteState {
   if (state.status !== 'playing') return state
   if (state.selected.length !== 4) {
-    return { ...state, message: 'Bitte genau vier Begriffe auswählen.' }
+    return {
+      ...state,
+      message: 'Bitte genau vier Begriffe auswählen.',
+      feedback: null,
+    }
   }
 
-  const category = findMatchingCategory(state.selected, state.solution)
+  const category = findMatchingCategory(state.selected, state.groups)
   if (category) {
+    const meta = state.groups[category]
     const solved: SolvedGroup[] = [
       ...state.solved,
-      { category, terms: [...state.solution[category]] },
+      {
+        category,
+        explanation: meta.explanation,
+        difficulty: meta.difficulty,
+        terms: [...meta.terms],
+      },
     ]
     const board = state.board.filter((t) => !state.selected.includes(t))
     let next: ViererketteState = {
@@ -136,7 +224,8 @@ export function submitGroup(state: ViererketteState): ViererketteState {
       board,
       selected: [],
       solved,
-      message: `Gruppe gefunden: ${category}`,
+      feedback: 'correct',
+      message: `${meta.category}: ${meta.explanation}`,
     }
     if (board.length === 0) {
       next = { ...next, status: 'won', message: 'Alle Gruppen gefunden!' }
@@ -146,27 +235,50 @@ export function submitGroup(state: ViererketteState): ViererketteState {
     return next
   }
 
+  const overlap = bestOverlap(state.selected, state)
   const mistakes = state.mistakes + 1
+  const points = Math.max(0, state.points - POINTS_PER_MISTAKE)
+  const feedback: FeedbackKind = overlap === 3 ? 'one-off' : 'no-match'
+  const hint =
+    feedback === 'one-off'
+      ? 'Knapp daneben – drei Begriffe gehören zusammen.'
+      : 'Kein Treffer.'
+
   if (mistakes >= MAX_MISTAKES) {
-    const remaining = Object.entries(state.solution)
+    const remaining = Object.entries(state.groups)
       .filter(([cat]) => !state.solved.some((s) => s.category === cat))
-      .map(([category, terms]) => ({ category, terms: [...terms] }))
+      .map(([categoryName, meta]) => ({
+        category: categoryName,
+        explanation: meta.explanation,
+        difficulty: meta.difficulty,
+        terms: [...meta.terms],
+      }))
     return {
       ...state,
       mistakes,
+      points,
       selected: [],
       status: 'lost',
       solved: [...state.solved, ...remaining],
       board: [],
-      message: 'Leider verloren. Die Gruppen wurden aufgedeckt.',
+      feedback,
+      message: `${hint} Leider verloren – die Gruppen wurden aufgedeckt.`,
     }
   }
+
+  const remaining = MAX_MISTAKES - mistakes
+  const remainingText =
+    remaining === 1
+      ? 'Nur noch ein Versuch übrig.'
+      : `Noch ${remaining} Fehlversuche möglich.`
 
   return {
     ...state,
     mistakes,
+    points,
     selected: [],
-    message: `Leider falsch. Noch ${MAX_MISTAKES - mistakes} Fehlversuch${MAX_MISTAKES - mistakes === 1 ? '' : 'e'}.`,
+    feedback,
+    message: `${hint} (−${POINTS_PER_MISTAKE} Punkte). ${remainingText}`,
   }
 }
 
@@ -179,5 +291,6 @@ export function shuffleBoard(state: ViererketteState): ViererketteState {
     selected: [],
     shuffleCount: state.shuffleCount + 1,
     message: null,
+    feedback: null,
   }
 }

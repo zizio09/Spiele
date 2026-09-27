@@ -8,6 +8,7 @@ import {
   persistWordleState,
   removeLetter,
   scoreGuess,
+  setCursor,
   submitGuess,
   type LetterMark,
   type WordleState,
@@ -48,6 +49,16 @@ export function WordlePage() {
         setState((s) => removeLetter(s))
         return
       }
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault()
+        setState((s) => setCursor(s, Math.max(0, s.cursor - 1)))
+        return
+      }
+      if (e.key === 'ArrowRight') {
+        e.preventDefault()
+        setState((s) => setCursor(s, Math.min(WORD_LENGTH - 1, s.cursor + 1)))
+        return
+      }
       if (/^[a-zA-ZäöüÄÖÜß]$/.test(e.key)) {
         e.preventDefault()
         setState((s) => addLetter(s, e.key))
@@ -58,6 +69,7 @@ export function WordlePage() {
   }, [])
 
   const keys = keyStatuses(state.guesses, state.answer)
+  const activeRow = state.status === 'playing' ? state.guesses.length : -1
 
   const onVirtual = (key: string) => {
     if (key === 'ENTER') setState((s) => submitGuess(s))
@@ -72,11 +84,10 @@ export function WordlePage() {
       const marks = scoreGuess(guess, state.answer)
       rows.push(guess.split('').map((letter, j) => ({ letter, mark: marks[j] })))
     } else if (i === state.guesses.length && state.status === 'playing') {
-      const letters = state.current.padEnd(WORD_LENGTH).split('')
       rows.push(
-        letters.map((letter) => ({
-          letter: letter.trim(),
-          mark: letter.trim() ? 'tbd' : 'empty',
+        state.letters.map((letter) => ({
+          letter,
+          mark: letter ? ('tbd' as const) : ('empty' as const),
         })),
       )
     } else {
@@ -90,7 +101,7 @@ export function WordlePage() {
         <h1>Wordle</h1>
         <p>
           Errate das deutsche Wort mit fünf Buchstaben. Du hast sechs Versuche. Ungültige Wörter
-          zählen nicht.
+          zählen nicht. Klicke in der aktuellen Zeile auf eine Position, um dort zu tippen.
         </p>
       </header>
 
@@ -109,28 +120,43 @@ export function WordlePage() {
       <div className="wordle-board" role="grid" aria-label="Wordle-Spielfeld">
         {rows.map((row, ri) => (
           <div className="wordle-row" role="row" key={ri}>
-            {row.map((cell, ci) => (
-              <div
-                key={ci}
-                role="gridcell"
-                className={`tile ${markClass(cell.mark)} ${cell.letter ? 'tile--filled' : ''}`}
-                aria-label={
-                  cell.letter
-                    ? `${cell.letter}, ${
-                        cell.mark === 'correct'
-                          ? 'richtig'
-                          : cell.mark === 'present'
-                            ? 'an anderer Stelle'
-                            : cell.mark === 'absent'
-                              ? 'nicht enthalten'
-                              : 'eingegeben'
-                      }`
-                    : 'leer'
-                }
-              >
-                {cell.letter}
-              </div>
-            ))}
+            {row.map((cell, ci) => {
+              const isActiveRow = ri === activeRow
+              const isCursor = isActiveRow && state.cursor === ci
+              return (
+                <button
+                  key={ci}
+                  type="button"
+                  role="gridcell"
+                  className={`tile ${markClass(cell.mark)} ${cell.letter ? 'tile--filled' : ''} ${
+                    isCursor ? 'tile--cursor' : ''
+                  }`}
+                  disabled={!isActiveRow}
+                  aria-label={
+                    isActiveRow
+                      ? `Position ${ci + 1}${cell.letter ? `, ${cell.letter}` : ', leer'}${
+                          isCursor ? ', ausgewählt' : ''
+                        }`
+                      : cell.letter
+                        ? `${cell.letter}, ${
+                            cell.mark === 'correct'
+                              ? 'richtig'
+                              : cell.mark === 'present'
+                                ? 'an anderer Stelle'
+                                : cell.mark === 'absent'
+                                  ? 'nicht enthalten'
+                                  : 'eingegeben'
+                          }`
+                        : 'leer'
+                  }
+                  onClick={() => {
+                    if (isActiveRow) setState((s) => setCursor(s, ci))
+                  }}
+                >
+                  {cell.letter}
+                </button>
+              )
+            })}
           </div>
         ))}
       </div>

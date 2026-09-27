@@ -12,7 +12,10 @@ export interface WordleState {
   date: string
   answer: string
   guesses: string[]
-  current: string
+  /** Aktuelle Zeile: genau fünf Slots (leer = ''). */
+  letters: string[]
+  /** Cursor in der aktuellen Zeile (0–4). */
+  cursor: number
   status: WordleStatus
   message: string | null
 }
@@ -26,21 +29,56 @@ export function getDailyAnswer(dateStr: string = getBerlinDateString()): string 
   return WORDLE_ANSWERS[idx]
 }
 
+function emptyLetters(): string[] {
+  return Array.from({ length: WORD_LENGTH }, () => '')
+}
+
 export function createWordleState(dateStr: string = getBerlinDateString()): WordleState {
   return {
     date: dateStr,
     answer: getDailyAnswer(dateStr),
     guesses: [],
-    current: '',
+    letters: emptyLetters(),
+    cursor: 0,
     status: 'playing',
     message: null,
   }
 }
 
+interface LegacyWordleState {
+  date: string
+  answer: string
+  guesses: string[]
+  current?: string
+  letters?: string[]
+  cursor?: number
+  status: WordleStatus
+}
+
 export function loadWordleState(dateStr: string = getBerlinDateString()): WordleState {
-  const saved = loadDailyProgress<WordleState>(WORDLE_STORAGE_KEY, dateStr)
+  const saved = loadDailyProgress<LegacyWordleState>(WORDLE_STORAGE_KEY, dateStr)
   if (saved && saved.answer === getDailyAnswer(dateStr)) {
-    return { ...saved, message: null }
+    let letters = emptyLetters()
+    if (saved.letters && saved.letters.length === WORD_LENGTH) {
+      letters = saved.letters.map((ch) => (ch ?? '').toUpperCase())
+    } else if (typeof saved.current === 'string') {
+      const chars = saved.current.toUpperCase().split('')
+      for (let i = 0; i < WORD_LENGTH; i++) letters[i] = chars[i] ?? ''
+    }
+    const filled = letters.filter(Boolean).length
+    const cursor =
+      typeof saved.cursor === 'number' && saved.cursor >= 0 && saved.cursor < WORD_LENGTH
+        ? saved.cursor
+        : Math.min(filled, WORD_LENGTH - 1)
+    return {
+      date: saved.date,
+      answer: saved.answer,
+      guesses: saved.guesses,
+      letters,
+      cursor,
+      status: saved.status,
+      message: null,
+    }
   }
   return createWordleState(dateStr)
 }
@@ -48,6 +86,10 @@ export function loadWordleState(dateStr: string = getBerlinDateString()): Wordle
 export function persistWordleState(state: WordleState): void {
   const { message: _message, ...rest } = state
   saveJson(WORDLE_STORAGE_KEY, rest)
+}
+
+export function currentWord(state: WordleState): string {
+  return state.letters.join('')
 }
 
 /**
@@ -92,22 +134,44 @@ export function isValidGuess(raw: string): { ok: true; word: string } | { ok: fa
   return { ok: true, word }
 }
 
+export function setCursor(state: WordleState, index: number): WordleState {
+  if (state.status !== 'playing') return state
+  if (index < 0 || index >= WORD_LENGTH) return state
+  return { ...state, cursor: index, message: null }
+}
+
 export function addLetter(state: WordleState, letter: string): WordleState {
   if (state.status !== 'playing') return state
   const ch = normalizeGermanLetters(letter)
-  if (ch.length !== 1 || state.current.length >= WORD_LENGTH) return { ...state, message: null }
-  return { ...state, current: state.current + ch, message: null }
+  if (ch.length !== 1) return { ...state, message: null }
+
+  const letters = [...state.letters]
+  letters[state.cursor] = ch
+  const cursor = Math.min(state.cursor + 1, WORD_LENGTH - 1)
+  return { ...state, letters, cursor, message: null }
 }
 
 export function removeLetter(state: WordleState): WordleState {
-  if (state.status !== 'playing' || state.current.length === 0) return state
-  return { ...state, current: state.current.slice(0, -1), message: null }
+  if (state.status !== 'playing') return state
+  const letters = [...state.letters]
+  let cursor = state.cursor
+
+  if (letters[cursor]) {
+    letters[cursor] = ''
+  } else if (cursor > 0) {
+    cursor -= 1
+    letters[cursor] = ''
+  } else {
+    return state
+  }
+
+  return { ...state, letters, cursor, message: null }
 }
 
 export function submitGuess(state: WordleState): WordleState {
   if (state.status !== 'playing') return state
 
-  const result = isValidGuess(state.current)
+  const result = isValidGuess(currentWord(state))
   if (!result.ok) {
     return { ...state, message: result.reason }
   }
@@ -117,7 +181,8 @@ export function submitGuess(state: WordleState): WordleState {
     return {
       ...state,
       guesses,
-      current: '',
+      letters: emptyLetters(),
+      cursor: 0,
       status: 'won',
       message: 'Richtig! Gut gemacht.',
     }
@@ -127,13 +192,14 @@ export function submitGuess(state: WordleState): WordleState {
     return {
       ...state,
       guesses,
-      current: '',
+      letters: emptyLetters(),
+      cursor: 0,
       status: 'lost',
       message: `Leider verloren. Die Lösung war ${state.answer}.`,
     }
   }
 
-  return { ...state, guesses, current: '', message: null }
+  return { ...state, guesses, letters: emptyLetters(), cursor: 0, message: null }
 }
 
 export function keyStatuses(guesses: string[], answer: string): Record<string, LetterMark> {

@@ -1,35 +1,128 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useId, useState } from 'react'
+import { DIFFICULTY_LABEL } from '../../data/viererkette/puzzles'
 import {
   MAX_MISTAKES,
+  START_POINTS,
+  clearSelection,
+  loadViererketteSettings,
   loadViererketteState,
+  persistViererketteSettings,
   persistViererketteState,
   shuffleBoard,
   submitGroup,
   toggleSelect,
+  type TermSize,
+  type ViererketteSettings,
   type ViererketteState,
 } from './viererketteLogic'
 
 export function ViererkettePage() {
   const [state, setState] = useState<ViererketteState>(() => loadViererketteState())
+  const [settings, setSettings] = useState<ViererketteSettings>(() => loadViererketteSettings())
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  const settingsTitleId = useId()
 
   useEffect(() => {
     persistViererketteState(state)
   }, [state])
 
+  useEffect(() => {
+    persistViererketteSettings(settings)
+  }, [settings])
+
+  const remaining = MAX_MISTAKES - state.mistakes
+
   return (
-    <div className="game-page viererkette-page">
+    <div
+      className={[
+        'game-page viererkette-page',
+        settings.darkMode ? 'vk--dark' : '',
+        `vk--size-${settings.termSize}`,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <header className="game-header">
-        <h1>Viererkette</h1>
+        <div className="vk-title-row">
+          <h1>Viererkette</h1>
+          <button
+            type="button"
+            className="vk-settings-btn"
+            aria-label="Einstellungen öffnen"
+            aria-expanded={settingsOpen}
+            aria-controls="vk-settings"
+            onClick={() => setSettingsOpen((o) => !o)}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                fill="currentColor"
+                d="M19.14 12.94c.04-.31.06-.63.06-.94s-.02-.63-.06-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.07 7.07 0 0 0-1.63-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.55-1.63.94l-2.39-.96a.5.5 0 0 0-.6.22L2.77 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.43.34.68.24l2.39-.96c.5.39 1.04.71 1.63.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.55 1.63-.94l2.39.96c.25.1.54 0 .68-.24l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.5A3.5 3.5 0 1 1 12 8.5a3.5 3.5 0 0 1 0 7z"
+              />
+            </svg>
+          </button>
+        </div>
         <p>
-          Finde vier Gruppen zu je vier Begriffen. Vier Fehlversuche sind erlaubt. Mische die
-          Felder, ohne die Lösung zu ändern.
+          Ordne 16 Begriffe in vier thematische Gruppen. Manchmal verbindet die Bedeutung, manchmal
+          eine Silbe oder ein verstecktes Muster – Vorsicht vor falschen Fährten. Jeden Tag um
+          Mitternacht (Europe/Berlin) gibt es ein neues Rätsel.
         </p>
       </header>
 
+      {settingsOpen && (
+        <div
+          id="vk-settings"
+          className="vk-settings"
+          role="dialog"
+          aria-labelledby={settingsTitleId}
+        >
+          <h2 id={settingsTitleId}>Einstellungen</h2>
+          <label className="vk-settings__row">
+            <span>Dunkelmodus</span>
+            <input
+              type="checkbox"
+              checked={settings.darkMode}
+              onChange={(e) => setSettings((s) => ({ ...s, darkMode: e.target.checked }))}
+            />
+          </label>
+          <fieldset className="vk-settings__row">
+            <legend>Begriffsgröße</legend>
+            {(
+              [
+                ['klein', 'Kleiner'],
+                ['normal', 'Normal'],
+                ['gross', 'Größer'],
+              ] as const
+            ).map(([value, label]) => (
+              <label key={value} className="vk-settings__radio">
+                <input
+                  type="radio"
+                  name="termSize"
+                  checked={settings.termSize === value}
+                  onChange={() => setSettings((s) => ({ ...s, termSize: value as TermSize }))}
+                />
+                {label}
+              </label>
+            ))}
+          </fieldset>
+          <button type="button" className="btn btn--ghost" onClick={() => setSettingsOpen(false)}>
+            Schließen
+          </button>
+        </div>
+      )}
+
       <div className="vk-toolbar">
         <p className="vk-mistakes" aria-live="polite">
-          Fehlversuche: {state.mistakes} / {MAX_MISTAKES}
+          Punkte: {state.points} · Fehlversuche: {state.mistakes} / {MAX_MISTAKES}
+          {state.status === 'playing' && remaining <= 1 ? ' · Letzter Versuch!' : ''}
         </p>
+        <button
+          type="button"
+          className="btn btn--ghost"
+          onClick={() => setState((s) => clearSelection(s))}
+          disabled={state.status !== 'playing' || state.selected.length === 0}
+        >
+          Auswahl löschen
+        </button>
         <button
           type="button"
           className="btn btn--ghost"
@@ -44,20 +137,51 @@ export function ViererkettePage() {
           onClick={() => setState((s) => submitGroup(s))}
           disabled={state.status !== 'playing' || state.selected.length !== 4}
         >
-          Gruppe prüfen
+          Auswahl bestätigen
         </button>
       </div>
 
+      <p className="vk-legend" aria-hidden="true">
+        <span className="vk-dot vk-dot--green">Leicht</span>
+        <span className="vk-dot vk-dot--yellow">Mittel</span>
+        <span className="vk-dot vk-dot--red">Anspruchsvoll</span>
+        <span className="vk-dot vk-dot--purple">Besonders knifflig</span>
+      </p>
+
       {state.message && (
-        <p className="game-message" role="status">
+        <p
+          className={`game-message ${
+            state.feedback === 'one-off'
+              ? 'vk-feedback--one-off'
+              : state.feedback === 'no-match'
+                ? 'vk-feedback--no-match'
+                : state.feedback === 'correct'
+                  ? 'vk-feedback--correct'
+                  : ''
+          }`}
+          role="status"
+        >
           {state.message}
+        </p>
+      )}
+
+      {state.status === 'won' && (
+        <p className="game-result" role="status">
+          Geschafft mit {state.points} von {START_POINTS} Punkten.
         </p>
       )}
 
       <div className="vk-solved" aria-live="polite">
         {state.solved.map((group) => (
-          <div key={group.category} className="vk-solved__group">
-            <h2>{group.category}</h2>
+          <div
+            key={group.category}
+            className={`vk-solved__group vk-solved__group--${group.difficulty}`}
+          >
+            <h2>
+              {group.category}
+              <span className="vk-diff-label"> · {DIFFICULTY_LABEL[group.difficulty]}</span>
+            </h2>
+            <p className="vk-solved__expl">{group.explanation}</p>
             <p>{group.terms.join(' · ')}</p>
           </div>
         ))}

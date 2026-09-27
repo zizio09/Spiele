@@ -10,7 +10,7 @@ const GAMES = [
   {
     to: '/viererkette',
     title: 'Viererkette',
-    text: 'Sechzehn Begriffe, vier Gruppen – finde die Verbindungen.',
+    text: 'Sechzehn Begriffe, vier farbige Gruppen – Verbindungen erkennen, knapp daneben zählen.',
   },
   {
     to: '/sudoku',
