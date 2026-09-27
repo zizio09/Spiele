@@ -115,44 +115,13 @@ interface StoredSudoku {
   status: 'playing' | 'won'
 }
 
-export function loadSudokuState(
-  difficulty: SudokuDifficulty,
-  dateStr: string = getBerlinDateString(),
-): SudokuState {
-  const saved = loadJson<StoredSudoku>(SUDOKU_STORAGE_KEY)
-  const puzzle = getDailySudoku(difficulty, dateStr)
-  if (
-    saved &&
-    saved.date === dateStr &&
-    saved.difficulty === difficulty &&
-    saved.puzzleId === puzzle.id
-  ) {
-    const grid = saved.grid.map((row) =>
-      row.map((cell) => ({
-        value: cell.value,
-        given: cell.given,
-        notes: new Set(cell.notes) as ReadonlySet<SudokuDigit>,
-        conflict: false,
-      })),
-    )
-    return {
-      date: saved.date,
-      difficulty: saved.difficulty,
-      puzzleId: saved.puzzleId,
-      solution: saved.solution,
-      grid,
-      selected: null,
-      notesMode: saved.notesMode,
-      history: saved.history,
-      status: saved.status,
-      message: null,
-    }
-  }
-  return createSudokuState(difficulty, dateStr)
+interface StoredSudokuBundle {
+  date: string
+  byDifficulty: Partial<Record<SudokuDifficulty, StoredSudoku>>
 }
 
-export function persistSudokuState(state: SudokuState): void {
-  const payload: StoredSudoku = {
+function toStored(state: SudokuState): StoredSudoku {
+  return {
     date: state.date,
     difficulty: state.difficulty,
     puzzleId: state.puzzleId,
@@ -168,6 +137,73 @@ export function persistSudokuState(state: SudokuState): void {
     history: state.history,
     status: state.status,
   }
+}
+
+function fromStored(saved: StoredSudoku): SudokuState {
+  const grid = saved.grid.map((row) =>
+    row.map((cell) => ({
+      value: cell.value,
+      given: cell.given,
+      notes: new Set(cell.notes) as ReadonlySet<SudokuDigit>,
+      conflict: false,
+    })),
+  )
+  return {
+    date: saved.date,
+    difficulty: saved.difficulty,
+    puzzleId: saved.puzzleId,
+    solution: saved.solution,
+    grid,
+    selected: null,
+    notesMode: saved.notesMode,
+    history: saved.history,
+    status: saved.status,
+    message: null,
+  }
+}
+
+export function loadSudokuState(
+  difficulty: SudokuDifficulty,
+  dateStr: string = getBerlinDateString(),
+): SudokuState {
+  const puzzle = getDailySudoku(difficulty, dateStr)
+  const raw = loadJson<StoredSudokuBundle | StoredSudoku>(SUDOKU_STORAGE_KEY)
+  if (!raw || raw.date !== dateStr) {
+    return createSudokuState(difficulty, dateStr)
+  }
+
+  // Abwärtskompatibel: früheres Einzel-Speicherformat
+  if ('difficulty' in raw && 'puzzleId' in raw && !('byDifficulty' in raw)) {
+    const legacy = raw as StoredSudoku
+    if (legacy.difficulty === difficulty && legacy.puzzleId === puzzle.id) {
+      return fromStored(legacy)
+    }
+    return createSudokuState(difficulty, dateStr)
+  }
+
+  const bundle = raw as StoredSudokuBundle
+  const saved = bundle.byDifficulty?.[difficulty]
+  if (saved && saved.puzzleId === puzzle.id) {
+    return fromStored(saved)
+  }
+  return createSudokuState(difficulty, dateStr)
+}
+
+export function persistSudokuState(state: SudokuState): void {
+  const raw = loadJson<StoredSudokuBundle | StoredSudoku>(SUDOKU_STORAGE_KEY)
+  let byDifficulty: Partial<Record<SudokuDifficulty, StoredSudoku>> = {}
+
+  if (raw && raw.date === state.date) {
+    if ('byDifficulty' in raw && raw.byDifficulty) {
+      byDifficulty = { ...raw.byDifficulty }
+    } else if ('difficulty' in raw && 'puzzleId' in raw) {
+      const legacy = raw as StoredSudoku
+      byDifficulty = { [legacy.difficulty]: legacy }
+    }
+  }
+
+  byDifficulty[state.difficulty] = toStored(state)
+  const payload: StoredSudokuBundle = { date: state.date, byDifficulty }
   saveJson(SUDOKU_STORAGE_KEY, payload)
 }
 
