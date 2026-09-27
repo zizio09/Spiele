@@ -32,6 +32,33 @@ export function SudokuPage() {
     persistSudokuState(state)
   }, [state])
 
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z') {
+        e.preventDefault()
+        setState((s) => undo(s))
+        return
+      }
+      if (e.ctrlKey || e.metaKey || e.altKey) return
+      if (e.key >= '1' && e.key <= '9') {
+        e.preventDefault()
+        setState((s) => enterDigit(s, Number(e.key) as SudokuDigit))
+        return
+      }
+      if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') {
+        e.preventDefault()
+        setState((s) => eraseCell(s))
+        return
+      }
+      if (e.key === 'n' || e.key === 'N') {
+        e.preventDefault()
+        setState((s) => toggleNotesMode(s))
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+
   return (
     <div className="game-page sudoku-page">
       <header className="game-header">
