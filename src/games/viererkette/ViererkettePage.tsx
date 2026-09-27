@@ -1,11 +1,22 @@
 import { useEffect, useId, useState } from 'react'
+import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { RoundBadge } from '../../components/RoundBadge'
 import { DIFFICULTY_LABEL } from '../../data/viererkette/puzzles'
+import {
+  formatAverageScore,
+  loadViererketteLifetimeStats,
+  recordViererketteWin,
+  winRecordKey,
+  type ViererketteLifetimeStats,
+} from './lifetimeStats'
 import {
   MAX_MISTAKES,
   START_POINTS,
   clearSelection,
+  createExtraViererketteState,
   loadViererketteSettings,
   loadViererketteState,
+  markStatsRecorded,
   persistViererketteSettings,
   persistViererketteState,
   shuffleBoard,
@@ -19,6 +30,9 @@ import {
 export function ViererkettePage() {
   const [state, setState] = useState<ViererketteState>(() => loadViererketteState())
   const [settings, setSettings] = useState<ViererketteSettings>(() => loadViererketteSettings())
+  const [lifetime, setLifetime] = useState<ViererketteLifetimeStats>(() =>
+    loadViererketteLifetimeStats(),
+  )
   const [settingsOpen, setSettingsOpen] = useState(false)
   const settingsTitleId = useId()
 
@@ -30,7 +44,21 @@ export function ViererkettePage() {
     persistViererketteSettings(settings)
   }, [settings])
 
+  useEffect(() => {
+    if (state.status === 'won' && !state.statsRecorded) {
+      const key = winRecordKey({
+        date: state.date,
+        puzzleId: state.puzzleId,
+        mode: state.mode,
+        extraRound: state.extraRound,
+      })
+      setLifetime(recordViererketteWin(state.points, key))
+      setState((s) => markStatsRecorded(s))
+    }
+  }, [state.status, state.statsRecorded, state.points, state.date, state.puzzleId, state.mode, state.extraRound])
+
   const remaining = MAX_MISTAKES - state.mistakes
+  const finished = state.status === 'won' || state.status === 'lost'
 
   return (
     <div
@@ -67,6 +95,23 @@ export function ViererkettePage() {
           Mitternacht (Europe/Berlin) gibt es ein neues Rätsel.
         </p>
       </header>
+
+      <RoundBadge mode={state.mode} />
+
+      <div className="vk-lifetime" aria-label="Lebensstatistik Viererkette">
+        <div>
+          <span className="vk-lifetime__label">Spiele</span>
+          <strong>{lifetime.gamesWon}</strong>
+        </div>
+        <div>
+          <span className="vk-lifetime__label">Punkteschnitt</span>
+          <strong>{formatAverageScore(lifetime)}</strong>
+        </div>
+        <div>
+          <span className="vk-lifetime__label">Höchste Punktzahl</span>
+          <strong>{lifetime.gamesWon > 0 ? lifetime.highestScore : '–'}</strong>
+        </div>
+      </div>
 
       {settingsOpen && (
         <div
@@ -195,6 +240,10 @@ export function ViererkettePage() {
         <p className="game-result" role="status">
           Geschafft mit {state.points} von {START_POINTS} Punkten.
         </p>
+      )}
+
+      {finished && (
+        <PlayAgainButton onClick={() => setState((s) => createExtraViererketteState(s))} />
       )}
 
       <div className="vk-solved" aria-live="polite">

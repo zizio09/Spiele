@@ -375,6 +375,53 @@ button {
   background: rgba(232, 163, 23, 0.18);
 }
 
+.round-badge {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  text-align: center;
+}
+
+.round-badge--extra {
+  color: var(--accent-deep);
+}
+
+.round-badge__hint {
+  font-weight: 500;
+}
+
+.play-again-btn {
+  margin-top: 0.15rem;
+}
+
+.vk-lifetime {
+  width: min(640px, 100%);
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.55rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+  text-align: center;
+}
+
+.vk-lifetime__label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--ink-soft);
+  margin-bottom: 0.15rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.vk-lifetime strong {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+}
+
 .wordle-board {
   display: grid;
   gap: 0.4rem;
@@ -750,7 +797,18 @@ button {
 .viererkette-page.vk--dark .game-header p,
 .viererkette-page.vk--dark .vk-legend,
 .viererkette-page.vk--dark .vk-mistakes,
-.viererkette-page.vk--dark .vk-score__label {
+.viererkette-page.vk--dark .vk-score__label,
+.viererkette-page.vk--dark .round-badge {
+  color: #b8cfc3;
+}
+
+.viererkette-page.vk--dark .vk-lifetime {
+  background: #1a2f26;
+  border-color: rgba(232, 240, 236, 0.2);
+  color: #e8f0ec;
+}
+
+.viererkette-page.vk--dark .vk-lifetime__label {
   color: #b8cfc3;
 }
 

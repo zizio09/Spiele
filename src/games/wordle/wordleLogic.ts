@@ -2,6 +2,7 @@ import { WORDLE_ANSWERS } from '../../data/wordle/answers'
 import { WORDLE_DICTIONARY } from '../../data/wordle/dictionary'
 import { dailyIndex, getBerlinDateString } from '../../lib/berlinDate'
 import { normalizeGermanLetters } from '../../lib/normalizeGerman'
+import type { PlayMode } from '../../lib/playMode'
 import { loadDailyProgress, saveJson } from '../../lib/storage'
 
 export type LetterMark = 'correct' | 'present' | 'absent' | 'empty' | 'tbd'
@@ -18,31 +19,55 @@ export interface WordleState {
   cursor: number
   status: WordleStatus
   message: string | null
+  mode: PlayMode
+  extraRound: number
 }
 
 export const WORDLE_STORAGE_KEY = 'tagesrunde-wordle'
 export const MAX_GUESSES = 6
 export const WORD_LENGTH = 5
 
-export function getDailyAnswer(dateStr: string = getBerlinDateString()): string {
-  const idx = dailyIndex(dateStr, WORDLE_ANSWERS.length)
+export function getAnswerByOffset(dateStr: string, offset: number): string {
+  const base = dailyIndex(dateStr, WORDLE_ANSWERS.length)
+  const idx =
+    ((base + offset) % WORDLE_ANSWERS.length + WORDLE_ANSWERS.length) % WORDLE_ANSWERS.length
   return WORDLE_ANSWERS[idx]
+}
+
+export function getDailyAnswer(dateStr: string = getBerlinDateString()): string {
+  return getAnswerByOffset(dateStr, 0)
 }
 
 function emptyLetters(): string[] {
   return Array.from({ length: WORD_LENGTH }, () => '')
 }
 
-export function createWordleState(dateStr: string = getBerlinDateString()): WordleState {
+function buildWordleState(
+  dateStr: string,
+  offset: number,
+  mode: PlayMode,
+  extraRound: number,
+): WordleState {
   return {
     date: dateStr,
-    answer: getDailyAnswer(dateStr),
+    answer: getAnswerByOffset(dateStr, offset),
     guesses: [],
     letters: emptyLetters(),
     cursor: 0,
     status: 'playing',
     message: null,
+    mode,
+    extraRound,
   }
+}
+
+export function createWordleState(dateStr: string = getBerlinDateString()): WordleState {
+  return buildWordleState(dateStr, 0, 'daily', 0)
+}
+
+export function createExtraWordleState(prev: WordleState): WordleState {
+  const nextExtra = prev.extraRound + 1
+  return buildWordleState(prev.date, nextExtra, 'extra', nextExtra)
 }
 
 interface LegacyWordleState {
@@ -53,11 +78,13 @@ interface LegacyWordleState {
   letters?: string[]
   cursor?: number
   status: WordleStatus
+  mode?: PlayMode
+  extraRound?: number
 }
 
 export function loadWordleState(dateStr: string = getBerlinDateString()): WordleState {
   const saved = loadDailyProgress<LegacyWordleState>(WORDLE_STORAGE_KEY, dateStr)
-  if (saved && saved.answer === getDailyAnswer(dateStr)) {
+  if (saved && saved.answer === getDailyAnswer(dateStr) && (saved.mode ?? 'daily') === 'daily') {
     let letters = emptyLetters()
     if (saved.letters && saved.letters.length === WORD_LENGTH) {
       letters = saved.letters.map((ch) => (ch ?? '').toUpperCase())
@@ -78,12 +105,15 @@ export function loadWordleState(dateStr: string = getBerlinDateString()): Wordle
       cursor,
       status: saved.status,
       message: null,
+      mode: 'daily',
+      extraRound: saved.extraRound ?? 0,
     }
   }
   return createWordleState(dateStr)
 }
 
 export function persistWordleState(state: WordleState): void {
+  if (state.mode !== 'daily') return
   const { message: _message, ...rest } = state
   saveJson(WORDLE_STORAGE_KEY, rest)
 }

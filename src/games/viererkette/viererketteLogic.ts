@@ -4,6 +4,7 @@ import {
   type ViererkettePuzzle,
 } from '../../data/viererkette/puzzles'
 import { dailyIndex, dailySeed, getBerlinDateString } from '../../lib/berlinDate'
+import type { PlayMode } from '../../lib/playMode'
 import { seededShuffle } from '../../lib/seededRandom'
 import { loadDailyProgress, loadJson, saveJson } from '../../lib/storage'
 
@@ -42,9 +43,13 @@ export interface ViererketteState {
   status: ViererketteStatus
   message: string | null
   feedback: FeedbackKind
-  /** Kategorie → Metadaten inkl. sortierter Begriffe */
   groups: Record<string, GroupMeta>
   shuffleCount: number
+  mode: PlayMode
+  /** Zählt Zusatzrunden, um weitere Rätsel zu wählen. */
+  extraRound: number
+  /** Ob dieser Sieg bereits in die Lebensstatistik eingetragen wurde. */
+  statsRecorded: boolean
 }
 
 export type TermSize = 'klein' | 'normal' | 'gross'
@@ -59,9 +64,18 @@ export const DEFAULT_SETTINGS: ViererketteSettings = {
   termSize: 'normal',
 }
 
-export function getDailyPuzzle(dateStr: string = getBerlinDateString()): ViererkettePuzzle {
-  const idx = dailyIndex(dateStr, VIERERKETTE_PUZZLES.length)
+export function getPuzzleByOffset(
+  dateStr: string,
+  offset: number,
+): ViererkettePuzzle {
+  const base = dailyIndex(dateStr, VIERERKETTE_PUZZLES.length)
+  const idx = ((base + offset) % VIERERKETTE_PUZZLES.length + VIERERKETTE_PUZZLES.length) %
+    VIERERKETTE_PUZZLES.length
   return VIERERKETTE_PUZZLES[idx]
+}
+
+export function getDailyPuzzle(dateStr: string = getBerlinDateString()): ViererkettePuzzle {
+  return getPuzzleByOffset(dateStr, 0)
 }
 
 function buildGroups(puzzle: ViererkettePuzzle): Record<string, GroupMeta> {
@@ -81,9 +95,14 @@ function allTerms(puzzle: ViererkettePuzzle): string[] {
   return puzzle.groups.flatMap((g) => [...g.terms])
 }
 
-export function createViererketteState(dateStr: string = getBerlinDateString()): ViererketteState {
-  const puzzle = getDailyPuzzle(dateStr)
-  const seed = dailySeed(dateStr, 11)
+function buildState(
+  dateStr: string,
+  offset: number,
+  mode: PlayMode,
+  extraRound: number,
+): ViererketteState {
+  const puzzle = getPuzzleByOffset(dateStr, offset)
+  const seed = dailySeed(dateStr, 11 + offset * 97)
   const board = seededShuffle(allTerms(puzzle), seed)
   return {
     date: dateStr,
@@ -98,7 +117,20 @@ export function createViererketteState(dateStr: string = getBerlinDateString()):
     feedback: null,
     groups: buildGroups(puzzle),
     shuffleCount: 0,
+    mode,
+    extraRound,
+    statsRecorded: false,
   }
+}
+
+export function createViererketteState(dateStr: string = getBerlinDateString()): ViererketteState {
+  return buildState(dateStr, 0, 'daily', 0)
+}
+
+/** Neue spielbare Runde am selben Tag, ohne Tagesfortschritt zu überschreiben. */
+export function createExtraViererketteState(prev: ViererketteState): ViererketteState {
+  const nextExtra = prev.extraRound + 1
+  return buildState(prev.date, nextExtra, 'extra', nextExtra)
 }
 
 export function loadViererketteState(dateStr: string = getBerlinDateString()): ViererketteState {
@@ -107,13 +139,22 @@ export function loadViererketteState(dateStr: string = getBerlinDateString()): V
     dateStr,
   )
   const puzzle = getDailyPuzzle(dateStr)
-  if (saved && saved.puzzleId === puzzle.id && saved.groups) {
-    return { ...saved, message: null, feedback: saved.feedback ?? null }
+  if (saved && saved.puzzleId === puzzle.id && saved.groups && (saved.mode ?? 'daily') === 'daily') {
+    return {
+      ...saved,
+      mode: 'daily',
+      extraRound: saved.extraRound ?? 0,
+      statsRecorded: Boolean(saved.statsRecorded),
+      message: null,
+      feedback: saved.feedback ?? null,
+    }
   }
   return createViererketteState(dateStr)
 }
 
 export function persistViererketteState(state: ViererketteState): void {
+  // Zusatzrunden speichern den Tagesfortschritt nicht.
+  if (state.mode !== 'daily') return
   const { message: _m, ...rest } = state
   saveJson(VIERERKETTE_STORAGE_KEY, rest)
 }
@@ -159,7 +200,6 @@ function findMatchingCategory(terms: string[], groups: Record<string, GroupMeta>
   return null
 }
 
-/** Maximale Trefferanzahl zu einer ungelösten Gruppe. */
 export function bestOverlap(terms: string[], state: ViererketteState): number {
   const selected = new Set(terms)
   let best = 0
@@ -284,7 +324,10 @@ export function submitGroup(state: ViererketteState): ViererketteState {
 
 export function shuffleBoard(state: ViererketteState): ViererketteState {
   if (state.status !== 'playing' || state.board.length === 0) return state
-  const seed = dailySeed(state.date, 11 + state.shuffleCount + 1 + state.board.length * 13)
+  const seed = dailySeed(
+    state.date,
+    11 + state.shuffleCount + 1 + state.board.length * 13 + state.extraRound * 31,
+  )
   return {
     ...state,
     board: seededShuffle(state.board, seed),
@@ -293,4 +336,8 @@ export function shuffleBoard(state: ViererketteState): ViererketteState {
     message: null,
     feedback: null,
   }
+}
+
+export function markStatsRecorded(state: ViererketteState): ViererketteState {
+  return { ...state, statsRecorded: true }
 }

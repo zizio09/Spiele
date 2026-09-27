@@ -1,5 +1,6 @@
 import { PAARSUCHE_PUZZLES, type PaarsuchePuzzle } from '../../data/paarsuche/puzzles'
 import { dailyIndex, dailySeed, getBerlinDateString } from '../../lib/berlinDate'
+import type { PlayMode } from '../../lib/playMode'
 import { seededShuffle } from '../../lib/seededRandom'
 import { loadDailyProgress, saveJson } from '../../lib/storage'
 
@@ -22,31 +23,44 @@ export interface PaarsucheState {
   openIds: string[]
   moves: number
   status: PaarsucheStatus
-  /** Während der Verzögerung bei Nicht-Treffer. */
   locked: boolean
   message: string | null
+  mode: PlayMode
+  extraRound: number
 }
 
-export function getDailyPaarsuchePuzzle(dateStr: string = getBerlinDateString()): PaarsuchePuzzle {
-  const idx = dailyIndex(dateStr, PAARSUCHE_PUZZLES.length)
+export function getPaarsucheByOffset(dateStr: string, offset: number): PaarsuchePuzzle {
+  const base = dailyIndex(dateStr, PAARSUCHE_PUZZLES.length)
+  const idx =
+    ((base + offset) % PAARSUCHE_PUZZLES.length + PAARSUCHE_PUZZLES.length) %
+    PAARSUCHE_PUZZLES.length
   return PAARSUCHE_PUZZLES[idx]
 }
 
-export function buildDailyCards(dateStr: string = getBerlinDateString()): {
+export function getDailyPaarsuchePuzzle(dateStr: string = getBerlinDateString()): PaarsuchePuzzle {
+  return getPaarsucheByOffset(dateStr, 0)
+}
+
+export function buildCards(dateStr: string, offset: number): {
   puzzle: PaarsuchePuzzle
   cards: PaarsucheCard[]
 } {
-  const puzzle = getDailyPaarsuchePuzzle(dateStr)
+  const puzzle = getPaarsucheByOffset(dateStr, offset)
   const pairs = puzzle.imageIds.flatMap((imageId, i) => [
-    { id: `${imageId}-a-${i}`, imageId, faceUp: false, matched: false },
-    { id: `${imageId}-b-${i}`, imageId, faceUp: false, matched: false },
+    { id: `${imageId}-a-${i}-${offset}`, imageId, faceUp: false, matched: false },
+    { id: `${imageId}-b-${i}-${offset}`, imageId, faceUp: false, matched: false },
   ])
-  const cards = seededShuffle(pairs, dailySeed(dateStr, 42))
+  const cards = seededShuffle(pairs, dailySeed(dateStr, 42 + offset * 17))
   return { puzzle, cards }
 }
 
-export function createPaarsucheState(dateStr: string = getBerlinDateString()): PaarsucheState {
-  const { puzzle, cards } = buildDailyCards(dateStr)
+function buildPaarsucheState(
+  dateStr: string,
+  offset: number,
+  mode: PlayMode,
+  extraRound: number,
+): PaarsucheState {
+  const { puzzle, cards } = buildCards(dateStr, offset)
   return {
     date: dateStr,
     puzzleId: puzzle.id,
@@ -56,24 +70,40 @@ export function createPaarsucheState(dateStr: string = getBerlinDateString()): P
     status: 'playing',
     locked: false,
     message: null,
+    mode,
+    extraRound,
   }
+}
+
+export function createPaarsucheState(dateStr: string = getBerlinDateString()): PaarsucheState {
+  return buildPaarsucheState(dateStr, 0, 'daily', 0)
+}
+
+export function createExtraPaarsucheState(prev: PaarsucheState): PaarsucheState {
+  const nextExtra = prev.extraRound + 1
+  return buildPaarsucheState(prev.date, nextExtra, 'extra', nextExtra)
 }
 
 export function loadPaarsucheState(dateStr: string = getBerlinDateString()): PaarsucheState {
   const saved = loadDailyProgress<PaarsucheState>(PAARSUCHE_STORAGE_KEY, dateStr)
   const puzzle = getDailyPaarsuchePuzzle(dateStr)
-  if (saved && saved.puzzleId === puzzle.id) {
-    return { ...saved, locked: false, message: null, openIds: saved.openIds?.length === 2 ? [] : (saved.openIds ?? []) }
+  if (saved && saved.puzzleId === puzzle.id && (saved.mode ?? 'daily') === 'daily') {
+    return {
+      ...saved,
+      mode: 'daily',
+      extraRound: saved.extraRound ?? 0,
+      locked: false,
+      message: null,
+      openIds: saved.openIds?.length === 2 ? [] : (saved.openIds ?? []),
+    }
   }
   return createPaarsucheState(dateStr)
 }
 
 export function persistPaarsucheState(state: PaarsucheState): void {
+  if (state.mode !== 'daily') return
   const { message: _m, locked: _l, ...rest } = state
-  // Offene Nicht-Treffer nicht speichern
-  const cards = rest.cards.map((c) =>
-    c.matched ? c : { ...c, faceUp: false },
-  )
+  const cards = rest.cards.map((c) => (c.matched ? c : { ...c, faceUp: false }))
   saveJson(PAARSUCHE_STORAGE_KEY, { ...rest, cards, openIds: [], locked: false })
 }
 

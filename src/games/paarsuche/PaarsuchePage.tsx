@@ -1,7 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
+import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { RoundBadge } from '../../components/RoundBadge'
 import { getPairImage } from '../../data/paarsuche/images'
 import {
   FLIP_DELAY_MS,
+  createExtraPaarsucheState,
   flipCard,
   loadPaarsucheState,
   persistPaarsucheState,
@@ -47,6 +50,8 @@ export function PaarsuchePage() {
         </p>
       </header>
 
+      <RoundBadge mode={state.mode} />
+
       <p className="ps-moves" aria-live="polite">
         Züge: {state.moves}
       </p>
@@ -55,6 +60,10 @@ export function PaarsuchePage() {
         <p className="game-message" role="status">
           {state.message}
         </p>
+      )}
+
+      {state.status === 'won' && (
+        <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
       )}
 
       <div className="ps-grid" role="list" aria-label="Kartenfeld">
@@ -75,9 +84,7 @@ export function PaarsuchePage() {
                 <span className="ps-card__back" aria-hidden="true">
                   ?
                 </span>
-                <span className="ps-card__front">
-                  {image.render(`ps-${card.id}`)}
-                </span>
+                <span className="ps-card__front">{image.render(`ps-${card.id}`)}</span>
               </span>
             </button>
           )

@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
+import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { RoundBadge } from '../../components/RoundBadge'
 import {
   MAX_GUESSES,
   WORD_LENGTH,
   addLetter,
+  createExtraWordleState,
   keyStatuses,
   loadWordleState,
   persistWordleState,
@@ -105,6 +108,8 @@ export function WordlePage() {
         </p>
       </header>
 
+      <RoundBadge mode={state.mode} />
+
       {state.message && (
         <p className="game-message" role="status">
           {state.message}
@@ -112,9 +117,12 @@ export function WordlePage() {
       )}
 
       {(state.status === 'won' || state.status === 'lost') && (
-        <p className="game-result" role="status">
-          Lösung: <strong>{state.answer}</strong>
-        </p>
+        <>
+          <p className="game-result" role="status">
+            Lösung: <strong>{state.answer}</strong>
+          </p>
+          <PlayAgainButton onClick={() => setState((s) => createExtraWordleState(s))} />
+        </>
       )}
 
       <div className="wordle-board" role="grid" aria-label="Wordle-Spielfeld">

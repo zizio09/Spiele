@@ -1,7 +1,10 @@
 import { useEffect, useState } from 'react'
+import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { RoundBadge } from '../../components/RoundBadge'
 import {
   DIFFICULTIES,
   checkEntries,
+  createExtraSudokuState,
   enterDigit,
   eraseCell,
   loadSudokuState,
@@ -69,6 +72,8 @@ export function SudokuPage() {
         </p>
       </header>
 
+      <RoundBadge mode={state.mode} />
+
       <div className="sudoku-toolbar" role="group" aria-label="Schwierigkeit">
         {DIFFICULTIES.map((d) => (
           <button
@@ -90,9 +95,12 @@ export function SudokuPage() {
       )}
 
       {state.status === 'won' && (
-        <p className="game-result" role="status">
-          Gelöst!
-        </p>
+        <>
+          <p className="game-result" role="status">
+            Gelöst!
+          </p>
+          <PlayAgainButton onClick={() => setState((s) => createExtraSudokuState(s))} />
+        </>
       )}
 
       <div

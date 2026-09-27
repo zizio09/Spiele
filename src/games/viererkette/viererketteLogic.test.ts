@@ -3,9 +3,12 @@ import {
   MAX_MISTAKES,
   POINTS_PER_MISTAKE,
   START_POINTS,
+  VIERERKETTE_STORAGE_KEY,
   bestOverlap,
   clearSelection,
+  createExtraViererketteState,
   createViererketteState,
+  persistViererketteState,
   shuffleBoard,
   submitGroup,
   toggleSelect,
@@ -87,5 +90,25 @@ describe('Viererkette', () => {
     expect(state.selected).toHaveLength(0)
     const shuffled = shuffleBoard(state)
     expect([...shuffled.board].sort()).toEqual([...state.board].sort())
+  })
+
+  it('startet Zusatzrunden ohne den Tagesfortschritt zu überschreiben', () => {
+    localStorage.clear()
+    let daily = createViererketteState('2024-01-01')
+    daily = { ...daily, status: 'won', points: 90, statsRecorded: true }
+    persistViererketteState(daily)
+
+    const extra = createExtraViererketteState(daily)
+    expect(extra.mode).toBe('extra')
+    expect(extra.status).toBe('playing')
+    expect(extra.puzzleId).not.toBe(daily.puzzleId)
+    persistViererketteState(extra)
+
+    const raw = localStorage.getItem(VIERERKETTE_STORAGE_KEY)
+    expect(raw).toBeTruthy()
+    const saved = JSON.parse(raw!)
+    expect(saved.mode).toBe('daily')
+    expect(saved.status).toBe('won')
+    expect(saved.puzzleId).toBe(daily.puzzleId)
   })
 })

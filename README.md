@@ -35,8 +35,13 @@ npm run build
 
 Kein Node-Server, keine Datenbank, kein systemd-Dienst für diese Seite.
 
-## Technik
+## Tagesrätsel und Zusatzrunden
 
-- React, TypeScript, Vite (`base: "/"`)
-- Client-seitiges Routing (Server liefert `index.html` für unbekannte Pfade)
-- Rätseldaten getrennt von der Spiellogik unter `src/data/`
+Jedes Spiel speichert den **Tagesfortschritt** in `localStorage` (Schlüssel `tagesrunde-*`, gebunden an das Europe/Berlin-Datum).
+
+Nach einem beendeten Spiel erscheint **„Noch ein Spiel spielen“**. Das startet eine **Zusatzrunde** mit einem anderen Rätsel derselben Spieldatenbank. Zusatzrunden:
+- werden **nicht** in den Tagesfortschritt geschrieben,
+- sind mit dem Badge „Zusatzrunde“ gekennzeichnet,
+- lassen das offizielle Tagesrätsel unverändert.
+
+Bei Viererkette zählen Siege (Tagesrätsel und Zusatzrunden) in die Lebensstatistik: Spiele, Punkteschnitt, höchste Punktzahl.
