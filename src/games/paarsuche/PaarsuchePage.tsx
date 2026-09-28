@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { PlayAgainButton } from '../../components/PlayAgainButton'
 import { RoundBadge } from '../../components/RoundBadge'
+import { WinCelebration } from '../../components/WinCelebration'
 import { getPairImage } from '../../data/paarsuche/images'
 import {
   FLIP_DELAY_MS,
@@ -63,7 +64,10 @@ export function PaarsuchePage() {
       )}
 
       {state.status === 'won' && (
-        <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
+        <>
+          <WinCelebration outcome="won" />
+          <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
+        </>
       )}
 
       <div className="ps-grid" role="list" aria-label="Kartenfeld">

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { PlayAgainButton } from '../../components/PlayAgainButton'
 import { RoundBadge } from '../../components/RoundBadge'
+import { WinCelebration } from '../../components/WinCelebration'
 import {
   MAX_GUESSES,
   WORD_LENGTH,
@@ -118,6 +119,7 @@ export function WordlePage() {
 
       {(state.status === 'won' || state.status === 'lost') && (
         <>
+          <WinCelebration outcome={state.status === 'won' ? 'won' : 'finished'} />
           <p className="game-result" role="status">
             Lösung: <strong>{state.answer}</strong>
           </p>

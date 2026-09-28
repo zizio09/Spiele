@@ -1,6 +1,7 @@
 import { useEffect, useId, useState } from 'react'
 import { PlayAgainButton } from '../../components/PlayAgainButton'
 import { RoundBadge } from '../../components/RoundBadge'
+import { WinCelebration } from '../../components/WinCelebration'
 import { DIFFICULTY_LABEL } from '../../data/viererkette/puzzles'
 import {
   formatAverageScore,
@@ -235,6 +236,8 @@ export function ViererkettePage() {
           {state.message}
         </p>
       )}
+
+      {finished && <WinCelebration outcome={state.status === 'won' ? 'won' : 'finished'} />}
 
       {state.status === 'won' && (
         <p className="game-result" role="status">

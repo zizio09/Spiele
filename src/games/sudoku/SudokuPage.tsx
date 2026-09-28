@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { PlayAgainButton } from '../../components/PlayAgainButton'
 import { RoundBadge } from '../../components/RoundBadge'
+import { WinCelebration } from '../../components/WinCelebration'
 import {
   DIFFICULTIES,
   checkEntries,
@@ -96,6 +97,7 @@ export function SudokuPage() {
 
       {state.status === 'won' && (
         <>
+          <WinCelebration outcome="won" />
           <p className="game-result" role="status">
             Gelöst!
           </p>
