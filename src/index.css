@@ -556,8 +556,8 @@ button {
 .game-header p {
   margin: 0 auto 1.25rem;
   color: var(--ink-soft);
-  width: min(34ch, 100%);
-  max-width: 34ch;
+  width: min(22rem, 100%);
+  max-width: min(22rem, 100%);
   text-align: center;
   text-wrap: balance;
 }
@@ -575,8 +575,8 @@ button {
   margin: 0 auto 0.45rem;
   letter-spacing: -0.02em;
   text-align: center;
-  width: min(34ch, 100%);
-  max-width: 34ch;
+  width: min(22rem, 100%);
+  max-width: min(22rem, 100%);
   font-size: clamp(1.55rem, 3vw, 2rem);
 }
 
