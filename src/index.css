@@ -556,13 +556,14 @@ button {
 .game-header p {
   margin: 0 auto 1.25rem;
   color: var(--ink-soft);
-  max-width: 42ch;
+  max-width: 36ch;
   text-align: center;
+  text-wrap: pretty;
 }
 
 .game-header {
   text-align: center;
-  width: min(720px, 100%);
+  width: min(640px, 100%);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -570,10 +571,11 @@ button {
 
 .game-header h1 {
   font-family: var(--font-display);
-  margin: 0 0 0.4rem;
+  margin: 0 0 0.45rem;
   letter-spacing: -0.02em;
   text-align: center;
-  width: 100%;
+  width: fit-content;
+  max-width: 100%;
   font-size: clamp(1.55rem, 3vw, 2rem);
 }
 
