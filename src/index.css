@@ -164,9 +164,9 @@ button {
 }
 
 .main--home {
-  width: min(98vw, 1400px);
+  width: 100%;
   max-width: none;
-  padding: 0.35rem 0.55rem 0.5rem;
+  padding: 0 0 1.75rem;
   flex: 1;
 }
 
@@ -182,21 +182,22 @@ button {
   margin: 0;
 }
 
-/* —— Home: Spiele cards (fill viewport) —— */
+/* —— Home: tall photo hero, cards below the fold —— */
 .home--spiele {
-  flex: 1;
-  display: grid;
-  grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.65rem;
-  min-height: calc(100dvh - 7.5rem);
+  display: flex;
+  flex-direction: column;
+  gap: 1.35rem;
+  min-height: 0;
 }
 
 .spiele-banner {
   position: relative;
   isolation: isolate;
   overflow: hidden;
-  border-radius: 14px;
-  min-height: clamp(9.5rem, 22vh, 14rem);
+  border-radius: 0;
+  width: 100%;
+  min-height: calc(100dvh - 4.25rem);
+  height: calc(100dvh - 4.25rem);
   display: grid;
   align-items: end;
   color: #14231c;
@@ -212,7 +213,7 @@ button {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: 62% 35%;
+  object-position: 58% 42%;
   display: block;
 }
 
@@ -223,13 +224,13 @@ button {
   pointer-events: none;
   background:
     linear-gradient(
-      105deg,
-      rgba(238, 245, 240, 0.94) 0%,
-      rgba(238, 245, 240, 0.82) 34%,
-      rgba(238, 245, 240, 0.28) 58%,
-      rgba(20, 53, 40, 0.12) 100%
+      100deg,
+      rgba(238, 245, 240, 0.88) 0%,
+      rgba(238, 245, 240, 0.55) 28%,
+      rgba(238, 245, 240, 0.12) 52%,
+      transparent 72%
     ),
-    linear-gradient(180deg, rgba(238, 245, 240, 0.2), rgba(20, 53, 40, 0.28));
+    linear-gradient(180deg, rgba(10, 28, 20, 0.08) 0%, transparent 28%, rgba(10, 28, 20, 0.35) 100%);
 }
 
 .spiele-header {
@@ -237,33 +238,36 @@ button {
   z-index: 2;
   text-align: left;
   margin: 0;
-  padding: 1rem 1.15rem 1.1rem;
-  max-width: min(28rem, 58%);
+  padding: clamp(1.25rem, 4vh, 2.5rem) clamp(1.1rem, 4vw, 2.75rem);
+  max-width: min(32rem, 55%);
 }
 
 .spiele-header__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.2rem, 5vw, 3.2rem);
+  font-size: clamp(2.8rem, 8vw, 5rem);
   font-weight: 700;
   letter-spacing: -0.03em;
-  line-height: 1;
+  line-height: 0.95;
   color: #0f1a14;
-  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.65);
 }
 
 .spiele-header__lead {
-  margin: 0.4rem 0 0;
-  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  margin: 0.55rem 0 0;
+  font-size: clamp(1.05rem, 2.2vw, 1.3rem);
   line-height: 1.35;
-  color: #24352c;
+  color: #1c2e24;
   font-weight: 600;
-  max-width: 22ch;
+  max-width: 18ch;
 }
 
 .spiele-grid {
+  width: min(1200px, calc(100% - 1.5rem));
+  margin: 0 auto;
+  padding: 0 0.75rem 0.5rem;
+  height: auto;
   min-height: 0;
-  height: 100%;
 }
 
 .spiele-grid__list {
@@ -272,17 +276,16 @@ button {
   padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
-  height: 100%;
+  gap: 0.9rem;
+  height: auto;
   min-height: 0;
 }
 
 @media (min-width: 780px) {
   .spiele-grid__list {
     grid-template-columns: 1fr 1fr;
-    grid-template-rows: 1fr 1fr;
-    gap: 0.7rem;
+    grid-template-rows: none;
+    gap: 1rem;
   }
 }
 
@@ -293,14 +296,14 @@ button {
 
 .game-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(7rem, 0.8fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(8rem, 0.85fr);
   flex: 1;
-  min-height: 0;
-  border-radius: 6px;
+  min-height: 13.5rem;
+  border-radius: 8px;
   overflow: hidden;
   background: #fff;
   border: 1px solid rgba(20, 53, 40, 0.12);
-  box-shadow: 0 8px 22px rgba(20, 53, 40, 0.08);
+  box-shadow: 0 10px 28px rgba(20, 53, 40, 0.1);
   color: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
@@ -483,10 +486,11 @@ button {
 @media (max-width: 560px) {
   .game-card {
     grid-template-columns: 1fr;
+    min-height: 11.5rem;
   }
 
   .game-card__art {
-    min-height: 5.5rem;
+    min-height: 6rem;
   }
 
   .spiele-grid__list {
@@ -498,13 +502,18 @@ button {
     min-height: 0;
   }
 
+  .spiele-banner {
+    min-height: calc(100dvh - 5.5rem);
+    height: calc(100dvh - 5.5rem);
+  }
+
   .spiele-header {
     max-width: 78%;
-    padding: 0.85rem 0.9rem 0.95rem;
+    padding: 1rem 1rem 1.25rem;
   }
 
   .spiele-banner__media img {
-    object-position: 72% 30%;
+    object-position: 70% 38%;
   }
 }
 
