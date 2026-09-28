@@ -428,27 +428,48 @@ button {
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
-.win-celebration__dog {
+/* 4-Frame-Sprite: L M R M — harte Steps, kein Fade */
+.win-celebration__dog-sprite {
   position: absolute;
   inset: 0;
-  display: block;
   width: 100%;
   height: 100%;
-  margin: 0;
-  border-radius: 0;
-  object-fit: contain;
-  aspect-ratio: auto;
-  background: #000;
-  box-shadow: none;
-  opacity: 0;
-  pointer-events: none;
-  /* Kein Fade – harter Framewechsel für sichtbares Wedeln */
-  transition: none;
+  background-color: #000;
+  background-image: url('/celebrations/wag-sprite.webp');
+  background-repeat: no-repeat;
+  background-size: 400% 100%;
+  /* Mitte = Frame 1 von 0..3 → 33.333% */
+  background-position: 33.333% 0;
+  image-rendering: auto;
 }
 
-.win-celebration__dog.is-active {
-  opacity: 1;
-  z-index: 1;
+.win-celebration__dog-sprite.is-wagging {
+  animation: dog-wag-steps 0.8s infinite;
+}
+
+.win-celebration__dog-sprite.is-static {
+  animation: none;
+  background-position: 33.333% 0;
+}
+
+/* Explizite %-Positionen: bei background-size 400% sind Frames bei 0 / 33.3 / 66.6 / 100 */
+@keyframes dog-wag-steps {
+  0%,
+  24.99% {
+    background-position: 0% 0;
+  }
+  25%,
+  49.99% {
+    background-position: 33.333% 0;
+  }
+  50%,
+  74.99% {
+    background-position: 66.666% 0;
+  }
+  75%,
+  100% {
+    background-position: 100% 0;
+  }
 }
 
 .win-celebration__title {
@@ -532,6 +553,61 @@ button {
   }
 }
 
+.celebration-preview__controls {
+  display: grid;
+  gap: 0.65rem;
+  width: min(420px, 100%);
+  margin-bottom: 0.5rem;
+}
+
+.celebration-preview__controls select {
+  font: inherit;
+  font-size: 1.05rem;
+  padding: 0.35rem 0.5rem;
+  margin-left: 0.35rem;
+}
+
+.celebration-preview__status {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.celebration-preview__frames {
+  width: min(560px, 100%);
+  margin-top: 1.25rem;
+}
+
+.celebration-preview__frames h2 {
+  margin: 0 0 0.65rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+}
+
+.celebration-preview__strip {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.celebration-preview__strip figure {
+  margin: 0;
+  text-align: center;
+}
+
+.celebration-preview__strip img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 12px;
+  background: #000;
+}
+
+.celebration-preview__strip figcaption {
+  margin-top: 0.35rem;
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .win-celebration__sparkles {
     display: none;
@@ -539,6 +615,11 @@ button {
 
   .win-celebration__sparkles span {
     animation: none;
+  }
+
+  .win-celebration__dog-sprite.is-wagging {
+    animation: none;
+    background-position: 33.333% 0;
   }
 }
 

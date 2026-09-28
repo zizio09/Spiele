@@ -1,43 +1,22 @@
 import { useEffect, useState } from 'react'
 
-/** Optimierte WebP-Frames (~512px, ~40 KB). */
-const FRAME_SRCS = [
-  '/celebrations/wag-left.webp',
-  '/celebrations/wag-middle.webp',
-  '/celebrations/wag-right.webp',
-] as const
-
-/** Sequenz: links → mitte → rechts → mitte */
-const SEQUENCE = [0, 1, 2, 1] as const
-const FRAME_MS = 200
+/** Vier-Frame-Sprite: links → mitte → rechts → mitte (CSS steps-Animation). */
+export const WAG_SPRITE_SRC = '/celebrations/wag-sprite.webp'
+export const WAG_FRAME_MS = 200
+export const WAG_FRAME_COUNT = 4
 
 type Props = {
   outcome: 'won' | 'finished'
 }
 
-function preloadImages(srcs: readonly string[]): Promise<void> {
-  return Promise.all(
-    srcs.map(
-      (src) =>
-        new Promise<void>((resolve) => {
-          const img = new Image()
-          img.onload = () => resolve()
-          img.onerror = () => resolve()
-          img.src = src
-        }),
-    ),
-  ).then(() => undefined)
-}
-
 /**
  * Ruhige Sieges-/Abschlussfeier mit wedelndem Hund.
- * Drei vorab geladene Frames; Sichtbarkeit per Opacity (kein src-Swap).
- * Bei prefers-reduced-motion: nur Mittelbild.
+ * Wedeln per CSS-Sprite (kein React-src-Swap) – zuverlässig und leicht.
+ * Bei prefers-reduced-motion: statisches Mittelbild.
  */
 export function WinCelebration({ outcome }: Props) {
-  const [seqIndex, setSeqIndex] = useState(0)
   const [reduceMotion, setReduceMotion] = useState(false)
-  const [ready, setReady] = useState(false)
+  const [spriteReady, setSpriteReady] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -49,34 +28,34 @@ export function WinCelebration({ outcome }: Props) {
 
   useEffect(() => {
     let cancelled = false
-    preloadImages(FRAME_SRCS).then(() => {
-      if (!cancelled) setReady(true)
-    })
+    const img = new Image()
+    img.onload = () => {
+      if (!cancelled) setSpriteReady(true)
+    }
+    img.onerror = () => {
+      if (!cancelled) setSpriteReady(true)
+    }
+    img.src = WAG_SPRITE_SRC
     return () => {
       cancelled = true
     }
   }, [])
 
-  useEffect(() => {
-    if (!ready || reduceMotion) return
-    const id = window.setInterval(() => {
-      setSeqIndex((i) => (i + 1) % SEQUENCE.length)
-    }, FRAME_MS)
-    return () => window.clearInterval(id)
-  }, [ready, reduceMotion])
-
-  const activeFrame = reduceMotion || !ready ? 1 : SEQUENCE[seqIndex]
   const title = outcome === 'won' ? 'Geschafft!' : 'Runde beendet'
   const subtitle =
     outcome === 'won'
       ? 'Der Hund freut sich mit dir.'
       : 'Beim nächsten Mal klappt’s bestimmt.'
 
+  const wagging = spriteReady && !reduceMotion
+
   return (
     <div
       className={`win-celebration ${outcome === 'won' ? 'win-celebration--won' : 'win-celebration--finished'}`}
       role="status"
       aria-live="polite"
+      data-wagging={wagging ? 'true' : 'false'}
+      data-reduce-motion={reduceMotion ? 'true' : 'false'}
     >
       {outcome === 'won' && !reduceMotion && (
         <div className="win-celebration__sparkles" aria-hidden="true">
@@ -89,18 +68,12 @@ export function WinCelebration({ outcome }: Props) {
         </div>
       )}
       <div className="win-celebration__dog-stage">
-        {FRAME_SRCS.map((src, i) => (
-          <img
-            key={src}
-            className={`win-celebration__dog ${i === activeFrame ? 'is-active' : ''}`}
-            src={src}
-            alt={i === activeFrame ? 'Hund wedelt mit dem Schwanz' : ''}
-            width={512}
-            height={512}
-            decoding="sync"
-            draggable={false}
-          />
-        ))}
+        <div
+          className={`win-celebration__dog-sprite ${wagging ? 'is-wagging' : 'is-static'}`}
+          role="img"
+          aria-label="Hund wedelt mit dem Schwanz"
+          data-testid="dog-sprite"
+        />
       </div>
       <p className="win-celebration__title">{title}</p>
       <p className="win-celebration__subtitle">{subtitle}</p>

@@ -28,11 +28,13 @@ npm run build
 
 ## Siegesfeier (Hund)
 
-Die Wedel-Frames liegen als WebP (~512px, ~40 KB) in `public/celebrations/`. Originale Cutouts (~1.7 MB PNG) gehören nach `assets/celebrations-source/` (gitignored). Neu erzeugen:
+Die Wedel-Frames liegen als WebP (~512px, ~40 KB) in `public/celebrations/`, plus `wag-sprite.webp` (vier Frames: links→mitte→rechts→mitte) für die CSS-Animation. Originale Cutouts (~1.7 MB PNG) gehören nach `assets/celebrations-source/` (gitignored). Neu erzeugen:
 
 ```bash
 npm run optimize:celebrations
 ```
+
+**Animation prüfen ohne Spiel:** [http://127.0.0.1:43141/dev/celebration](http://127.0.0.1:43141/dev/celebration)
 
 ## Produktion auf dem Raspberry Pi
 
