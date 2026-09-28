@@ -26,11 +26,16 @@ const DIFF_LABEL: Record<SudokuDifficulty, string> = {
 }
 
 export function SudokuPage() {
-  const [difficulty, setDifficulty] = useState<SudokuDifficulty>('leicht')
-  const [state, setState] = useState<SudokuState>(() => loadSudokuState('leicht'))
+  const initial = loadSudokuState('leicht')
+  const [difficulty, setDifficulty] = useState<SudokuDifficulty>(initial.difficulty)
+  const [state, setState] = useState<SudokuState>(() => initial)
 
   useEffect(() => {
-    setState(loadSudokuState(difficulty))
+    const next = loadSudokuState(difficulty)
+    setState(next)
+    if (next.mode === 'extra' && next.difficulty !== difficulty) {
+      setDifficulty(next.difficulty)
+    }
   }, [difficulty])
 
   useEffect(() => {

@@ -3,11 +3,13 @@ import {
   MAX_MISTAKES,
   POINTS_PER_MISTAKE,
   START_POINTS,
+  VIERERKETTE_SESSION_KEY,
   VIERERKETTE_STORAGE_KEY,
   bestOverlap,
   clearSelection,
   createExtraViererketteState,
   createViererketteState,
+  loadViererketteState,
   persistViererketteState,
   shuffleBoard,
   submitGroup,
@@ -115,5 +117,25 @@ describe('Viererkette', () => {
     expect(saved.mode).toBe('daily')
     expect(saved.status).toBe('won')
     expect(saved.puzzleId).toBe(daily.puzzleId)
+
+    const sessionRaw = localStorage.getItem(VIERERKETTE_SESSION_KEY)
+    expect(sessionRaw).toBeTruthy()
+    const session = JSON.parse(sessionRaw!)
+    expect(session.mode).toBe('extra')
+    expect(session.status).toBe('playing')
+  })
+
+  it('stellt die aktive Zusatzrunde nach Remount wieder her statt der Tagesfeier', () => {
+    localStorage.clear()
+    let daily = createViererketteState('2024-01-01')
+    daily = { ...daily, status: 'won', points: 90, statsRecorded: true }
+    persistViererketteState(daily)
+    const extra = createExtraViererketteState(daily)
+    persistViererketteState(extra)
+
+    const restored = loadViererketteState('2024-01-01')
+    expect(restored.mode).toBe('extra')
+    expect(restored.status).toBe('playing')
+    expect(restored.puzzleId).toBe(extra.puzzleId)
   })
 })

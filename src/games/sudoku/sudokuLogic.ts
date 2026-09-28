@@ -1,7 +1,7 @@
 import { SUDOKU_PUZZLES } from '../../data/sudoku/puzzles'
 import { dailyIndex, getBerlinDateString } from '../../lib/berlinDate'
 import type { PlayMode } from '../../lib/playMode'
-import { loadJson, saveJson } from '../../lib/storage'
+import { clearKey, loadDailyProgress, loadJson, saveJson } from '../../lib/storage'
 import type {
   SudokuCell,
   SudokuDigit,
@@ -12,6 +12,8 @@ import type {
 } from './sudokuTypes'
 
 export const SUDOKU_STORAGE_KEY = 'tagesrunde-sudoku'
+/** Aktive Zusatzrunde – getrennt vom Tagesfortschritt. */
+export const SUDOKU_SESSION_KEY = 'tagesrunde-sudoku-session'
 export const DIFFICULTIES: SudokuDifficulty[] = ['leicht', 'mittel', 'schwer', 'sehr-schwer']
 
 function parseDigit(ch: string): SudokuDigit | null {
@@ -170,7 +172,7 @@ function toStored(state: SudokuState): StoredSudoku {
   }
 }
 
-function fromStored(saved: StoredSudoku): SudokuState {
+function fromStored(saved: StoredSudoku, mode: PlayMode = 'daily'): SudokuState {
   const grid = saved.grid.map((row) =>
     row.map((cell) => ({
       value: cell.value,
@@ -190,7 +192,7 @@ function fromStored(saved: StoredSudoku): SudokuState {
     history: saved.history,
     status: saved.status,
     message: null,
-    mode: 'daily',
+    mode,
     extraRound: saved.extraRound ?? 0,
   }
 }
@@ -199,6 +201,11 @@ export function loadSudokuState(
   difficulty: SudokuDifficulty,
   dateStr: string = getBerlinDateString(),
 ): SudokuState {
+  const session = loadDailyProgress<StoredSudoku>(SUDOKU_SESSION_KEY, dateStr)
+  if (session && (session.mode ?? 'daily') === 'extra') {
+    return fromStored(session, 'extra')
+  }
+
   const puzzle = getDailySudoku(difficulty, dateStr)
   const raw = loadJson<StoredSudokuBundle | StoredSudoku>(SUDOKU_STORAGE_KEY)
   if (!raw || raw.date !== dateStr) {
@@ -212,7 +219,7 @@ export function loadSudokuState(
       legacy.puzzleId === puzzle.id &&
       (legacy.mode ?? 'daily') === 'daily'
     ) {
-      return fromStored(legacy)
+      return fromStored(legacy, 'daily')
     }
     return createSudokuState(difficulty, dateStr)
   }
@@ -220,13 +227,18 @@ export function loadSudokuState(
   const bundle = raw as StoredSudokuBundle
   const saved = bundle.byDifficulty?.[difficulty]
   if (saved && saved.puzzleId === puzzle.id && (saved.mode ?? 'daily') === 'daily') {
-    return fromStored(saved)
+    return fromStored(saved, 'daily')
   }
   return createSudokuState(difficulty, dateStr)
 }
 
 export function persistSudokuState(state: SudokuState): void {
-  if (state.mode !== 'daily') return
+  if (state.mode === 'extra') {
+    saveJson(SUDOKU_SESSION_KEY, toStored(state))
+    return
+  }
+
+  clearKey(SUDOKU_SESSION_KEY)
   const raw = loadJson<StoredSudokuBundle | StoredSudoku>(SUDOKU_STORAGE_KEY)
   let byDifficulty: Partial<Record<SudokuDifficulty, StoredSudoku>> = {}
 

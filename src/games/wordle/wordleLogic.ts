@@ -3,7 +3,7 @@ import { WORDLE_DICTIONARY } from '../../data/wordle/dictionary'
 import { dailyIndex, getBerlinDateString } from '../../lib/berlinDate'
 import { normalizeGermanLetters } from '../../lib/normalizeGerman'
 import type { PlayMode } from '../../lib/playMode'
-import { loadDailyProgress, saveJson } from '../../lib/storage'
+import { clearKey, loadDailyProgress, saveJson } from '../../lib/storage'
 
 export type LetterMark = 'correct' | 'present' | 'absent' | 'empty' | 'tbd'
 
@@ -24,6 +24,8 @@ export interface WordleState {
 }
 
 export const WORDLE_STORAGE_KEY = 'tagesrunde-wordle'
+/** Aktive Zusatzrunde – getrennt vom Tagesfortschritt. */
+export const WORDLE_SESSION_KEY = 'tagesrunde-wordle-session'
 export const MAX_GUESSES = 6
 export const WORD_LENGTH = 5
 
@@ -83,38 +85,51 @@ interface LegacyWordleState {
 }
 
 export function loadWordleState(dateStr: string = getBerlinDateString()): WordleState {
+  const session = loadDailyProgress<LegacyWordleState>(WORDLE_SESSION_KEY, dateStr)
+  if (session && (session.mode ?? 'daily') === 'extra') {
+    return hydrateWordleState(session, 'extra')
+  }
+
   const saved = loadDailyProgress<LegacyWordleState>(WORDLE_STORAGE_KEY, dateStr)
   if (saved && saved.answer === getDailyAnswer(dateStr) && (saved.mode ?? 'daily') === 'daily') {
-    let letters = emptyLetters()
-    if (saved.letters && saved.letters.length === WORD_LENGTH) {
-      letters = saved.letters.map((ch) => (ch ?? '').toUpperCase())
-    } else if (typeof saved.current === 'string') {
-      const chars = saved.current.toUpperCase().split('')
-      for (let i = 0; i < WORD_LENGTH; i++) letters[i] = chars[i] ?? ''
-    }
-    const filled = letters.filter(Boolean).length
-    const cursor =
-      typeof saved.cursor === 'number' && saved.cursor >= 0 && saved.cursor < WORD_LENGTH
-        ? saved.cursor
-        : Math.min(filled, WORD_LENGTH - 1)
-    return {
-      date: saved.date,
-      answer: saved.answer,
-      guesses: saved.guesses,
-      letters,
-      cursor,
-      status: saved.status,
-      message: null,
-      mode: 'daily',
-      extraRound: saved.extraRound ?? 0,
-    }
+    return hydrateWordleState(saved, 'daily')
   }
   return createWordleState(dateStr)
 }
 
+function hydrateWordleState(saved: LegacyWordleState, mode: PlayMode): WordleState {
+  let letters = emptyLetters()
+  if (saved.letters && saved.letters.length === WORD_LENGTH) {
+    letters = saved.letters.map((ch) => (ch ?? '').toUpperCase())
+  } else if (typeof saved.current === 'string') {
+    const chars = saved.current.toUpperCase().split('')
+    for (let i = 0; i < WORD_LENGTH; i++) letters[i] = chars[i] ?? ''
+  }
+  const filled = letters.filter(Boolean).length
+  const cursor =
+    typeof saved.cursor === 'number' && saved.cursor >= 0 && saved.cursor < WORD_LENGTH
+      ? saved.cursor
+      : Math.min(filled, WORD_LENGTH - 1)
+  return {
+    date: saved.date,
+    answer: saved.answer,
+    guesses: saved.guesses,
+    letters,
+    cursor,
+    status: saved.status,
+    message: null,
+    mode,
+    extraRound: saved.extraRound ?? 0,
+  }
+}
+
 export function persistWordleState(state: WordleState): void {
-  if (state.mode !== 'daily') return
   const { message: _message, ...rest } = state
+  if (state.mode === 'extra') {
+    saveJson(WORDLE_SESSION_KEY, rest)
+    return
+  }
+  clearKey(WORDLE_SESSION_KEY)
   saveJson(WORDLE_STORAGE_KEY, rest)
 }
 

@@ -1,13 +1,19 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
+  PAARSUCHE_SESSION_KEY,
+  PAARSUCHE_STORAGE_KEY,
+  createExtraPaarsucheState,
   createPaarsucheState,
   flipCard,
+  loadPaarsucheState,
+  persistPaarsucheState,
   resolveMismatch,
 } from './paarsucheLogic'
 
 describe('Paarsuche', () => {
   afterEach(() => {
     vi.useRealTimers()
+    localStorage.clear()
   })
 
   it('erzeugt 16 Karten mit acht Paaren', () => {
@@ -73,5 +79,29 @@ describe('Paarsuche', () => {
     expect(state.cards.every((c) => c.matched)).toBe(true)
     expect(state.foundPairs).toHaveLength(8)
     expect(state.moves).toBe(8)
+  })
+
+  it('stellt Zusatzrunde nach Remount wieder her statt der Tagesfeier', () => {
+    let daily = createPaarsucheState('2024-01-01')
+    daily = { ...daily, status: 'won', moves: 12, statsRecorded: true }
+    persistPaarsucheState(daily)
+
+    const extra = createExtraPaarsucheState(daily)
+    expect(extra.mode).toBe('extra')
+    expect(extra.status).toBe('playing')
+    persistPaarsucheState(extra)
+
+    const dailyRaw = JSON.parse(localStorage.getItem(PAARSUCHE_STORAGE_KEY)!)
+    expect(dailyRaw.status).toBe('won')
+    expect(dailyRaw.mode).toBe('daily')
+
+    const sessionRaw = JSON.parse(localStorage.getItem(PAARSUCHE_SESSION_KEY)!)
+    expect(sessionRaw.mode).toBe('extra')
+    expect(sessionRaw.status).toBe('playing')
+
+    const restored = loadPaarsucheState('2024-01-01')
+    expect(restored.mode).toBe('extra')
+    expect(restored.status).toBe('playing')
+    expect(restored.puzzleId).toBe(extra.puzzleId)
   })
 })

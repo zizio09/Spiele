@@ -6,9 +6,11 @@ import {
 import { dailyIndex, dailySeed, getBerlinDateString } from '../../lib/berlinDate'
 import type { PlayMode } from '../../lib/playMode'
 import { seededShuffle } from '../../lib/seededRandom'
-import { loadDailyProgress, loadJson, saveJson } from '../../lib/storage'
+import { clearKey, loadDailyProgress, loadJson, saveJson } from '../../lib/storage'
 
 export const VIERERKETTE_STORAGE_KEY = 'tagesrunde-viererkette'
+/** Aktive Zusatzrunde – getrennt vom Tagesfortschritt. */
+export const VIERERKETTE_SESSION_KEY = 'tagesrunde-viererkette-session'
 export const VIERERKETTE_SETTINGS_KEY = 'tagesrunde-viererkette-settings'
 export const MAX_MISTAKES = 20
 export const POINTS_PER_MISTAKE = 5
@@ -134,6 +136,21 @@ export function createExtraViererketteState(prev: ViererketteState): Viererkette
 }
 
 export function loadViererketteState(dateStr: string = getBerlinDateString()): ViererketteState {
+  const session = loadDailyProgress<ViererketteState & { solution?: Record<string, string[]> }>(
+    VIERERKETTE_SESSION_KEY,
+    dateStr,
+  )
+  if (session && session.groups && (session.mode ?? 'daily') === 'extra') {
+    return {
+      ...session,
+      mode: 'extra',
+      extraRound: session.extraRound ?? 0,
+      statsRecorded: Boolean(session.statsRecorded),
+      message: null,
+      feedback: session.feedback ?? null,
+    }
+  }
+
   const saved = loadDailyProgress<ViererketteState & { solution?: Record<string, string[]> }>(
     VIERERKETTE_STORAGE_KEY,
     dateStr,
@@ -153,9 +170,12 @@ export function loadViererketteState(dateStr: string = getBerlinDateString()): V
 }
 
 export function persistViererketteState(state: ViererketteState): void {
-  // Zusatzrunden speichern den Tagesfortschritt nicht.
-  if (state.mode !== 'daily') return
   const { message: _m, ...rest } = state
+  if (state.mode === 'extra') {
+    saveJson(VIERERKETTE_SESSION_KEY, rest)
+    return
+  }
+  clearKey(VIERERKETTE_SESSION_KEY)
   saveJson(VIERERKETTE_STORAGE_KEY, rest)
 }
 

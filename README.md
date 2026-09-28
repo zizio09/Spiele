@@ -56,9 +56,15 @@ Kein Node-Server, keine Datenbank, kein systemd-Dienst für diese Seite.
 
 Jedes Spiel speichert den **Tagesfortschritt** in `localStorage` (Schlüssel `tagesrunde-*`, gebunden an das Europe/Berlin-Datum).
 
-Nach einem beendeten Spiel erscheint **„Noch ein Spiel spielen“**. Das startet eine **Zusatzrunde** mit einem anderen Rätsel derselben Spieldatenbank. Zusatzrunden:
+Nach einem beendeten Spiel erscheint **„Noch mal spielen“**. Das startet eine **Zusatzrunde** mit einem anderen Rätsel derselben Spieldatenbank. Zusatzrunden:
 - werden **nicht** in den Tagesfortschritt geschrieben,
+- liegen in einem eigenen Session-Schlüssel (`tagesrunde-*-session`), damit sie nach Navigation erhalten bleiben,
 - sind mit dem Badge „Zusatzrunde“ gekennzeichnet,
 - lassen das offizielle Tagesrätsel unverändert.
 
-Bei Viererkette zählen Siege (Tagesrätsel und Zusatzrunden) in die Lebensstatistik: Spiele, Punkteschnitt, höchste Punktzahl.
+### Lebensstatistik
+
+**Viererkette** und **Paarsuche** zeigen Spiele, Punkteschnitt und höchste Punktzahl (Tagesrätsel und Zusatzrunden).
+
+- **Viererkette:** Start 100 Punkte, −5 je Fehler.
+- **Paarsuche:** Punkte aus Zügen – `max(0, 100 − 5 × (Züge − 8))`. Acht Züge (jedes Paar im ersten Versuch) ergeben 100 Punkte; mehr Züge senken die Punktzahl.

@@ -2,9 +2,11 @@ import { PAARSUCHE_PUZZLES, type PaarsuchePuzzle } from '../../data/paarsuche/pu
 import { dailyIndex, dailySeed, getBerlinDateString } from '../../lib/berlinDate'
 import type { PlayMode } from '../../lib/playMode'
 import { seededShuffle } from '../../lib/seededRandom'
-import { loadDailyProgress, saveJson } from '../../lib/storage'
+import { clearKey, loadDailyProgress, saveJson } from '../../lib/storage'
 
 export const PAARSUCHE_STORAGE_KEY = 'tagesrunde-paarsuche'
+/** Aktive Zusatzrunde – getrennt vom Tagesfortschritt. */
+export const PAARSUCHE_SESSION_KEY = 'tagesrunde-paarsuche-session'
 export const FLIP_DELAY_MS = 1000
 
 export interface PaarsucheCard {
@@ -31,6 +33,8 @@ export interface PaarsucheState {
   message: string | null
   mode: PlayMode
   extraRound: number
+  /** Lebensstatistik für diesen Sieg bereits gezählt. */
+  statsRecorded: boolean
 }
 
 export function getPaarsucheByOffset(dateStr: string, offset: number): PaarsuchePuzzle {
@@ -78,6 +82,24 @@ function buildPaarsucheState(
     message: null,
     mode,
     extraRound,
+    statsRecorded: false,
+  }
+}
+
+function hydratePaarsucheState(saved: PaarsucheState): PaarsucheState {
+  const foundPairs =
+    saved.foundPairs ??
+    [...new Set(saved.cards.filter((c) => c.matched).map((c) => c.imageId))]
+  return {
+    ...saved,
+    mode: saved.mode ?? 'daily',
+    extraRound: saved.extraRound ?? 0,
+    statsRecorded: Boolean(saved.statsRecorded),
+    locked: false,
+    message: null,
+    openIds: saved.openIds?.length === 2 ? [] : (saved.openIds ?? []),
+    foundPairs,
+    lastFoundId: null,
   }
 }
 
@@ -91,31 +113,37 @@ export function createExtraPaarsucheState(prev: PaarsucheState): PaarsucheState 
 }
 
 export function loadPaarsucheState(dateStr: string = getBerlinDateString()): PaarsucheState {
+  const session = loadDailyProgress<PaarsucheState>(PAARSUCHE_SESSION_KEY, dateStr)
+  if (session && (session.mode ?? 'daily') === 'extra') {
+    return hydratePaarsucheState({ ...session, mode: 'extra' })
+  }
+
   const saved = loadDailyProgress<PaarsucheState>(PAARSUCHE_STORAGE_KEY, dateStr)
   const puzzle = getDailyPaarsuchePuzzle(dateStr)
   if (saved && saved.puzzleId === puzzle.id && (saved.mode ?? 'daily') === 'daily') {
-    const foundPairs =
-      saved.foundPairs ??
-      [...new Set(saved.cards.filter((c) => c.matched).map((c) => c.imageId))]
-    return {
-      ...saved,
-      mode: 'daily',
-      extraRound: saved.extraRound ?? 0,
-      locked: false,
-      message: null,
-      openIds: saved.openIds?.length === 2 ? [] : (saved.openIds ?? []),
-      foundPairs,
-      lastFoundId: null,
-    }
+    return hydratePaarsucheState({ ...saved, mode: 'daily' })
   }
   return createPaarsucheState(dateStr)
 }
 
-export function persistPaarsucheState(state: PaarsucheState): void {
-  if (state.mode !== 'daily') return
+function serializePaarsucheState(state: PaarsucheState) {
   const { message: _m, locked: _l, ...rest } = state
   const cards = rest.cards.map((c) => (c.matched ? c : { ...c, faceUp: false }))
-  saveJson(PAARSUCHE_STORAGE_KEY, { ...rest, cards, openIds: [], locked: false })
+  return { ...rest, cards, openIds: [], locked: false }
+}
+
+export function persistPaarsucheState(state: PaarsucheState): void {
+  const payload = serializePaarsucheState(state)
+  if (state.mode === 'extra') {
+    saveJson(PAARSUCHE_SESSION_KEY, payload)
+    return
+  }
+  clearKey(PAARSUCHE_SESSION_KEY)
+  saveJson(PAARSUCHE_STORAGE_KEY, payload)
+}
+
+export function markStatsRecorded(state: PaarsucheState): PaarsucheState {
+  return { ...state, statsRecorded: true }
 }
 
 export type FlipResult =

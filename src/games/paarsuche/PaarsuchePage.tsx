@@ -4,10 +4,19 @@ import { RoundBadge } from '../../components/RoundBadge'
 import { WinCelebration } from '../../components/WinCelebration'
 import { getPairImage } from '../../data/paarsuche/images'
 import {
+  formatAverageScore,
+  loadPaarsucheLifetimeStats,
+  recordPaarsucheWin,
+  scoreFromMoves,
+  winRecordKey,
+  type PaarsucheLifetimeStats,
+} from './lifetimeStats'
+import {
   FLIP_DELAY_MS,
   createExtraPaarsucheState,
   flipCard,
   loadPaarsucheState,
+  markStatsRecorded,
   persistPaarsucheState,
   resolveMismatch,
   type PaarsucheState,
@@ -18,6 +27,9 @@ const MATCH_LEAVE_MS = 550
 
 export function PaarsuchePage() {
   const [state, setState] = useState<PaarsucheState>(() => loadPaarsucheState())
+  const [lifetime, setLifetime] = useState<PaarsucheLifetimeStats>(() =>
+    loadPaarsucheLifetimeStats(),
+  )
   const [clearedIds, setClearedIds] = useState<string[]>(() =>
     loadPaarsucheState()
       .cards.filter((c) => c.matched)
@@ -29,6 +41,27 @@ export function PaarsuchePage() {
   useEffect(() => {
     persistPaarsucheState(state)
   }, [state])
+
+  useEffect(() => {
+    if (state.status === 'won' && !state.statsRecorded) {
+      const key = winRecordKey({
+        date: state.date,
+        puzzleId: state.puzzleId,
+        mode: state.mode,
+        extraRound: state.extraRound,
+      })
+      setLifetime(recordPaarsucheWin(scoreFromMoves(state.moves), key))
+      setState((s) => markStatsRecorded(s))
+    }
+  }, [
+    state.status,
+    state.statsRecorded,
+    state.moves,
+    state.date,
+    state.puzzleId,
+    state.mode,
+    state.extraRound,
+  ])
 
   useEffect(() => {
     const pending = state.cards
@@ -84,6 +117,21 @@ export function PaarsuchePage() {
 
       <RoundBadge mode={state.mode} />
 
+      <div className="vk-lifetime" aria-label="Lebensstatistik Paarsuche">
+        <div>
+          <span className="vk-lifetime__label">Spiele</span>
+          <strong>{lifetime.gamesWon}</strong>
+        </div>
+        <div>
+          <span className="vk-lifetime__label">Punkteschnitt</span>
+          <strong>{formatAverageScore(lifetime)}</strong>
+        </div>
+        <div>
+          <span className="vk-lifetime__label">Höchste Punktzahl</span>
+          <strong>{lifetime.gamesWon > 0 ? lifetime.highestScore : '–'}</strong>
+        </div>
+      </div>
+
       <div className="ps-layout">
         <aside className="ps-found" aria-label="Gefundene Paare">
           <h2 className="ps-found__title">Gefundene Paare</h2>
@@ -118,6 +166,7 @@ export function PaarsuchePage() {
         <div className="ps-main">
           <p className="ps-moves" aria-live="polite">
             Züge: {state.moves}
+            {state.status === 'won' ? ` · ${scoreFromMoves(state.moves)} Punkte` : ''}
           </p>
 
           {state.message && (
