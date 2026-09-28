@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { CelebrationActions } from '../../components/CelebrationActions'
 import { RoundBadge } from '../../components/RoundBadge'
 import { WinCelebration } from '../../components/WinCelebration'
 import { getPairImage } from '../../data/paarsuche/images'
@@ -129,7 +129,7 @@ export function PaarsuchePage() {
           {state.status === 'won' && (
             <>
               <WinCelebration outcome="won" />
-              <PlayAgainButton onClick={startExtra} />
+              <CelebrationActions onPlayAgain={startExtra} />
             </>
           )}
 

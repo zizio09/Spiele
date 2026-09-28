@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from 'react-router-dom'
+import { CelebrationActions } from './CelebrationActions'
 import { WinCelebration } from './WinCelebration'
 
 /**
@@ -32,6 +33,11 @@ export function CelebrationPreviewPage() {
       </p>
 
       <WinCelebration outcome={outcome} forceMotion={forceMotion} />
+      <CelebrationActions
+        onPlayAgain={() => {
+          window.location.reload()
+        }}
+      />
 
       <section className="celebration-preview__frames" aria-label="Einzelbilder">
         <h2>Einzelbilder (links · mitte · rechts)</h2>

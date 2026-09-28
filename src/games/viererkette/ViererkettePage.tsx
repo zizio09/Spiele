@@ -1,5 +1,5 @@
 import { useEffect, useId, useState } from 'react'
-import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { CelebrationActions } from '../../components/CelebrationActions'
 import { RoundBadge } from '../../components/RoundBadge'
 import { WinCelebration } from '../../components/WinCelebration'
 import { DIFFICULTY_LABEL } from '../../data/viererkette/puzzles'
@@ -249,7 +249,7 @@ export function ViererkettePage() {
       )}
 
       {finished && (
-        <PlayAgainButton onClick={() => setState((s) => createExtraViererketteState(s))} />
+        <CelebrationActions onPlayAgain={() => setState((s) => createExtraViererketteState(s))} />
       )}
 
       <div className="vk-solved" aria-live="polite">

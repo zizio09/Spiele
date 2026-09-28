@@ -1,65 +1,138 @@
 import { Link } from 'react-router-dom'
-import heroArt from '../assets/hero.svg'
 
-const GAMES = [
+type GameCard = {
+  to: string
+  title: string
+  hint: string
+  text: string
+  tone: 'wordle' | 'viererkette' | 'sudoku' | 'paarsuche'
+}
+
+const GAMES: GameCard[] = [
   {
     to: '/wordle',
     title: 'Wordle',
-    text: 'Sechs Versuche für das deutsche Fünf-Buchstaben-Wort des Tages.',
+    hint: 'Finde das Wort mit fünf Buchstaben',
+    text: 'Sechs Versuche für das deutsche Tageswort – klar, ruhig und ohne Ablenkung.',
+    tone: 'wordle',
   },
   {
     to: '/viererkette',
     title: 'Viererkette',
-    text: 'Sechzehn Begriffe, vier farbige Gruppen – Verbindungen erkennen, knapp daneben zählen.',
+    hint: 'Ordne 16 Begriffe in vier Gruppen',
+    text: 'Vier Verbindungen erkennen. Ein Fehler ist noch okay – zwei daneben und die Gruppe geht zurück.',
+    tone: 'viererkette',
   },
   {
     to: '/sudoku',
     title: 'Sudoku',
-    text: 'Klassisches 9×9 mit drei Schwierigkeitsstufen und Notizen.',
+    hint: 'Fülle das 9×9-Raster richtig aus',
+    text: 'Klassisches Sudoku mit drei Schwierigkeitsstufen, Hilfszahlen und großer Schrift.',
+    tone: 'sudoku',
   },
   {
     to: '/paarsuche',
     title: 'Paarsuche',
-    text: 'Acht Bildpaare aufdecken – ein festes Tageslayout für alle.',
+    hint: 'Finde die acht Bildpaare',
+    text: 'Zwei gleiche Bilder aufdecken. Gefundene Paare wandern nach links – das Feld wird übersichtlicher.',
+    tone: 'paarsuche',
   },
 ]
 
+function WordleArt() {
+  const cells = ['W', 'O', 'R', 'D', 'L', 'E', '', '', '']
+  return (
+    <div className="game-card__symbol game-card__symbol--wordle" aria-hidden="true">
+      {cells.map((letter, i) => (
+        <span key={i} className={`game-card__tile ${letter ? 'has-letter' : ''} ${letter === 'E' ? 'is-accent' : ''}`}>
+          {letter}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function ViererketteArt() {
+  const shades = [
+    3, 2, 1, 0, 2, 3, 0, 1, 1, 0, 3, 2, 0, 1, 2, 3,
+  ]
+  return (
+    <div className="game-card__symbol game-card__symbol--viererkette" aria-hidden="true">
+      {shades.map((shade, i) => (
+        <span key={i} className={`game-card__cell shade-${shade}`} />
+      ))}
+    </div>
+  )
+}
+
+function SudokuArt() {
+  const cells = ['5', '', '3', '', '7', '', '', '1', '9']
+  return (
+    <div className="game-card__symbol game-card__symbol--sudoku" aria-hidden="true">
+      {cells.map((n, i) => (
+        <span key={i} className={`game-card__sudoku-cell ${n ? 'has-num' : ''}`}>
+          {n}
+        </span>
+      ))}
+    </div>
+  )
+}
+
+function PaarsucheArt() {
+  return (
+    <div className="game-card__symbol game-card__symbol--paarsuche" aria-hidden="true">
+      <span className="game-card__pair">
+        <span className="game-card__pair-face" />
+      </span>
+      <span className="game-card__pair">
+        <span className="game-card__pair-face" />
+      </span>
+    </div>
+  )
+}
+
+function GameArt({ tone }: { tone: GameCard['tone'] }) {
+  switch (tone) {
+    case 'wordle':
+      return <WordleArt />
+    case 'viererkette':
+      return <ViererketteArt />
+    case 'sudoku':
+      return <SudokuArt />
+    case 'paarsuche':
+      return <PaarsucheArt />
+  }
+}
+
 export function HomePage() {
   return (
-    <div className="home">
-      <section className="hero" aria-labelledby="hero-title">
-        <div className="hero__visual" aria-hidden="true">
-          <img src={heroArt} alt="" className="hero__img" />
-        </div>
-        <div className="hero__copy">
-          <p className="hero__brand">Tagesrunde</p>
-          <h1 id="hero-title">Vier Spiele. Ein Tag. Deine Runde.</h1>
-          <p className="hero__lead">
-            Jeden Tag neue Rätsel – Wordle, Viererkette, Sudoku und Paarsuche, komplett auf Deutsch.
-          </p>
-          <div className="hero__actions">
-            <Link className="btn btn--primary" to="/wordle">
-              Mit Wordle starten
-            </Link>
-            <Link className="btn btn--ghost" to="/viererkette">
-              Zur Viererkette
-            </Link>
-            <Link className="btn btn--ghost" to="/preview/celebration">
-              Vorschau Feier
-            </Link>
-          </div>
-        </div>
-      </section>
+    <div className="home home--spiele">
+      <header className="spiele-header">
+        <p className="spiele-header__brand">Tagesrunde</p>
+        <h1 id="spiele-title" className="spiele-header__title">
+          Spiele
+        </h1>
+        <p className="spiele-header__lead">
+          Vier Tagesrätsel – groß, klar und ohne Werbung. Wähle ein Spiel.
+        </p>
+        <p className="spiele-header__preview">
+          <Link to="/preview/celebration">Vorschau Feier</Link>
+        </p>
+      </header>
 
-      <section className="game-picker" aria-labelledby="picker-title">
-        <h2 id="picker-title">Die vier Spiele</h2>
-        <p className="section-lead">Wähle ein Spiel – jedes hat genau ein Tagesrätsel.</p>
-        <ul className="game-picker__list">
-          {GAMES.map((game, i) => (
-            <li key={game.to} style={{ animationDelay: `${0.05 * i}s` }}>
-              <Link to={game.to} className="game-picker__link">
-                <span className="game-picker__title">{game.title}</span>
-                <span className="game-picker__text">{game.text}</span>
+      <section className="spiele-grid" aria-labelledby="spiele-title">
+        <ul className="spiele-grid__list">
+          {GAMES.map((game) => (
+            <li key={game.to}>
+              <Link to={game.to} className={`game-card game-card--${game.tone}`}>
+                <div className="game-card__body">
+                  <p className="game-card__hint">{game.hint}</p>
+                  <h2 className="game-card__title">{game.title}</h2>
+                  <p className="game-card__text">{game.text}</p>
+                </div>
+                <div className="game-card__art">
+                  <GameArt tone={game.tone} />
+                </div>
               </Link>
             </li>
           ))}

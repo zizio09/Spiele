@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { CelebrationActions } from '../../components/CelebrationActions'
 import { RoundBadge } from '../../components/RoundBadge'
 import { WinCelebration } from '../../components/WinCelebration'
 import {
@@ -102,7 +102,7 @@ export function SudokuPage() {
           <p className="game-result" role="status">
             Gelöst!
           </p>
-          <PlayAgainButton onClick={() => setState((s) => createExtraSudokuState(s))} />
+          <CelebrationActions onPlayAgain={() => setState((s) => createExtraSudokuState(s))} />
         </>
       )}
 

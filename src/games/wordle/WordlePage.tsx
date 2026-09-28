@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PlayAgainButton } from '../../components/PlayAgainButton'
+import { CelebrationActions } from '../../components/CelebrationActions'
 import { RoundBadge } from '../../components/RoundBadge'
 import { WinCelebration } from '../../components/WinCelebration'
 import {
@@ -126,7 +126,7 @@ export function WordlePage() {
               : 'Leider verloren.'}{' '}
             Lösung: <strong>{state.answer}</strong>
           </p>
-          <PlayAgainButton onClick={() => setState((s) => createExtraWordleState(s))} />
+          <CelebrationActions onPlayAgain={() => setState((s) => createExtraWordleState(s))} />
         </>
       )}
 
