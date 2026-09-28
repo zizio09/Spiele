@@ -39,6 +39,23 @@ const GAMES: GameCard[] = [
   },
 ]
 
+const HEROES = [
+  {
+    id: 'hero-1',
+    webp: '/images/home-hero-1.webp',
+    jpg: '/images/home-hero-1.jpg',
+    alt: 'Kind mit gelbem Shirt bläst Seifenblasen auf einer Wiese',
+    position: 'center 35%',
+  },
+  {
+    id: 'hero-2',
+    webp: '/images/home-hero-2.webp',
+    jpg: '/images/home-hero-2.jpg',
+    alt: 'Kind im gestreiften Shirt bläst Seifenblasen im Garten',
+    position: '68% 40%',
+  },
+] as const
+
 function WordleArt() {
   const cells = ['W', 'O', 'R', 'D', 'L', 'E', '', '', '']
   return (
@@ -108,46 +125,57 @@ function GameArt({ tone }: { tone: GameCard['tone'] }) {
 export function HomePage() {
   return (
     <div className="home home--spiele">
-      <section className="spiele-banner" aria-labelledby="spiele-title">
-        <div className="spiele-banner__media" aria-hidden="true">
-          <picture>
-            <source srcSet="/images/home-banner.webp" type="image/webp" />
-            <img
-              src="/images/home-banner.jpg"
-              alt=""
-              width={1600}
-              height={900}
-              decoding="async"
-              fetchPriority="high"
-            />
-          </picture>
-        </div>
-        <div className="spiele-banner__shade" aria-hidden="true" />
+      <div className="spiele-heroes" aria-label="Impressionen">
+        {HEROES.map((hero, index) => (
+          <section
+            key={hero.id}
+            className={`spiele-hero spiele-hero--${index + 1}`}
+            aria-label={hero.alt}
+          >
+            <div className="spiele-hero__media" aria-hidden="true">
+              <picture>
+                <source srcSet={hero.webp} type="image/webp" />
+                <img
+                  src={hero.jpg}
+                  alt=""
+                  width={1707}
+                  height={1280}
+                  decoding={index === 0 ? 'sync' : 'async'}
+                  fetchPriority={index === 0 ? 'high' : 'low'}
+                  style={{ objectPosition: hero.position }}
+                />
+              </picture>
+            </div>
+          </section>
+        ))}
+      </div>
+
+      <section className="spiele-games" aria-labelledby="spiele-title">
         <header className="spiele-header">
           <h1 id="spiele-title" className="spiele-header__title">
             Spiele
           </h1>
           <p className="spiele-header__lead">Vier Tagesrätsel – groß, klar und ohne Werbung.</p>
         </header>
-      </section>
 
-      <section className="spiele-grid" aria-label="Spielauswahl">
-        <ul className="spiele-grid__list">
-          {GAMES.map((game) => (
-            <li key={game.to}>
-              <Link to={game.to} className={`game-card game-card--${game.tone}`}>
-                <div className="game-card__body">
-                  <p className="game-card__hint">{game.hint}</p>
-                  <h2 className="game-card__title">{game.title}</h2>
-                  <p className="game-card__text">{game.text}</p>
-                </div>
-                <div className="game-card__art">
-                  <GameArt tone={game.tone} />
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="spiele-grid" aria-label="Spielauswahl">
+          <ul className="spiele-grid__list">
+            {GAMES.map((game) => (
+              <li key={game.to}>
+                <Link to={game.to} className={`game-card game-card--${game.tone}`}>
+                  <div className="game-card__body">
+                    <p className="game-card__hint">{game.hint}</p>
+                    <h2 className="game-card__title">{game.title}</h2>
+                    <p className="game-card__text">{game.text}</p>
+                  </div>
+                  <div className="game-card__art">
+                    <GameArt tone={game.tone} />
+                  </div>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </section>
     </div>
   )
