@@ -26,6 +26,14 @@ npm run build
 
 `dist/` ist absichtlich versioniert (der Raspberry Pi baut nicht selbst).
 
+## Siegesfeier (Hund)
+
+Die Wedel-Frames liegen als WebP (~512px, ~40 KB) in `public/celebrations/`. Originale Cutouts (~1.7 MB PNG) gehören nach `assets/celebrations-source/` (gitignored). Neu erzeugen:
+
+```bash
+npm run optimize:celebrations
+```
+
 ## Produktion auf dem Raspberry Pi
 
 1. Repository nach `/var/www/spiele` klonen oder den Inhalt dorthin kopieren.

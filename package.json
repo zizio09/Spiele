@@ -9,7 +9,8 @@
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "optimize:celebrations": "node scripts/optimize-celebrations.mjs"
   },
   "dependencies": {
     "react": "^19.2.8",
@@ -27,6 +28,7 @@
     "@vitest/coverage-v8": "^5.0.2",
     "jsdom": "^29.1.1",
     "oxlint": "^1.81.0",
+    "sharp": "^0.35.5",
     "typescript": "~6.0.2",
     "vite": "^8.3.0",
     "vitest": "^5.0.2"

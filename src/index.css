@@ -417,16 +417,38 @@ button {
   background: linear-gradient(180deg, #0a0a0a 0%, #141414 42%, rgba(238, 245, 240, 0.96) 42%);
 }
 
-.win-celebration__dog {
-  display: block;
+.win-celebration__dog-stage {
+  position: relative;
   width: min(300px, 90%);
-  height: auto;
+  aspect-ratio: 1 / 1;
   margin: 0 auto 0.75rem;
   border-radius: 18px;
-  object-fit: contain;
-  aspect-ratio: 1 / 1;
   background: #000;
+  overflow: hidden;
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.win-celebration__dog {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  border-radius: 0;
+  object-fit: contain;
+  aspect-ratio: auto;
+  background: #000;
+  box-shadow: none;
+  opacity: 0;
+  pointer-events: none;
+  /* Kein Fade – harter Framewechsel für sichtbares Wedeln */
+  transition: none;
+}
+
+.win-celebration__dog.is-active {
+  opacity: 1;
+  z-index: 1;
 }
 
 .win-celebration__title {

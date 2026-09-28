@@ -24,3 +24,6 @@ dist-ssr
 
 # Test coverage
 coverage
+
+# Large celebration source cutouts (~1.7 MB each); ship WebP in public/celebrations/
+assets/celebrations-source/
