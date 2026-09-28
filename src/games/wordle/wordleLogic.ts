@@ -214,7 +214,7 @@ export function submitGuess(state: WordleState): WordleState {
       letters: emptyLetters(),
       cursor: 0,
       status: 'won',
-      message: 'Richtig! Gut gemacht.',
+      message: 'Geschafft! Du hast das Wort gefunden.',
     }
   }
 

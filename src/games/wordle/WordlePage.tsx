@@ -121,6 +121,9 @@ export function WordlePage() {
         <>
           <WinCelebration outcome={state.status === 'won' ? 'won' : 'finished'} />
           <p className="game-result" role="status">
+            {state.status === 'won'
+              ? 'Du hast gewonnen!'
+              : 'Leider verloren.'}{' '}
             Lösung: <strong>{state.answer}</strong>
           </p>
           <PlayAgainButton onClick={() => setState((s) => createExtraWordleState(s))} />

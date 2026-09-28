@@ -92,8 +92,9 @@ export function ViererkettePage() {
         </div>
         <p>
           Ordne 16 Begriffe in vier thematische Gruppen. Manchmal verbindet die Bedeutung, manchmal
-          eine Silbe oder ein verstecktes Muster – Vorsicht vor falschen Fährten. Jeden Tag um
-          Mitternacht (Europe/Berlin) gibt es ein neues Rätsel.
+          eine Silbe oder ein verstecktes Muster – Vorsicht vor falschen Fährten. Auch die letzte
+          Gruppe musst du selbst bestätigen. Jeden Tag um Mitternacht (Europe/Berlin) gibt es ein
+          neues Rätsel.
         </p>
       </header>
 
@@ -230,6 +231,8 @@ export function ViererkettePage() {
                 : state.feedback === 'correct'
                   ? 'vk-feedback--correct'
                   : ''
+          } ${
+            state.feedback === 'one-off' || state.feedback === 'no-match' ? 'vk-feedback--shake' : ''
           }`}
           role="status"
         >
@@ -266,7 +269,13 @@ export function ViererkettePage() {
       </div>
 
       {state.board.length > 0 && (
-        <div className="vk-grid" role="list" aria-label="Begriffsfeld">
+        <div
+          className={`vk-grid ${
+            state.feedback === 'one-off' || state.feedback === 'no-match' ? 'vk-grid--shake' : ''
+          }`}
+          role="list"
+          aria-label="Begriffsfeld"
+        >
           {state.board.map((term) => {
             const selected = state.selected.includes(term)
             return (

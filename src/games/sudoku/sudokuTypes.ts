@@ -1,6 +1,6 @@
 import type { PlayMode } from '../../lib/playMode'
 
-export type SudokuDifficulty = 'leicht' | 'mittel' | 'schwer'
+export type SudokuDifficulty = 'leicht' | 'mittel' | 'schwer' | 'sehr-schwer'
 
 export type SudokuDigit = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9
 

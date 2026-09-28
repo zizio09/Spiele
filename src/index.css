@@ -656,13 +656,25 @@ button {
 }
 
 .vk-toolbar,
-.sudoku-toolbar,
 .sudoku-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 0.6rem;
   justify-content: center;
   align-items: center;
+}
+
+.sudoku-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.sudoku-toolbar .btn {
+  font-size: 0.95rem;
+  padding: 0.55rem 0.9rem;
 }
 
 .vk-mistakes,
@@ -823,6 +835,37 @@ button {
 
 .vk-feedback--correct {
   background: rgba(47, 107, 79, 0.14);
+}
+
+.vk-feedback--shake,
+.vk-grid--shake {
+  animation: vk-shake 0.45s ease;
+}
+
+@keyframes vk-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-6px);
+  }
+  40% {
+    transform: translateX(6px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vk-feedback--shake,
+  .vk-grid--shake {
+    animation: none;
+  }
 }
 
 .vk-grid {
@@ -1069,8 +1112,8 @@ button {
 .ps-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.65rem;
-  width: min(520px, 100%);
+  gap: 0.75rem;
+  width: min(560px, 100%);
   perspective: 900px;
 }
 
@@ -1079,7 +1122,8 @@ button {
   border: none;
   padding: 0;
   background: transparent;
-  border-radius: 14px;
+  border-radius: 16px;
+  min-height: 4.5rem;
 }
 
 .ps-card__inner {
@@ -1101,10 +1145,10 @@ button {
   position: absolute;
   inset: 0;
   backface-visibility: hidden;
-  border-radius: 14px;
+  border-radius: 16px;
   display: grid;
   place-items: center;
-  border: 1px solid var(--line);
+  border: 2px solid var(--line);
   box-shadow: var(--shadow);
 }
 
@@ -1113,7 +1157,8 @@ button {
     linear-gradient(145deg, var(--bg-mid), var(--bg-deep));
   color: #f7faf8;
   font-family: var(--font-display);
-  font-size: 1.8rem;
+  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-weight: 700;
 }
 
 .ps-card__front {
@@ -1122,12 +1167,12 @@ button {
 }
 
 .ps-card.is-matched .ps-card__front {
-  box-shadow: 0 0 0 2px var(--accent);
+  box-shadow: 0 0 0 3px var(--accent);
 }
 
 .pair-svg {
-  width: 72%;
-  height: 72%;
+  width: 78%;
+  height: 78%;
 }
 
 @keyframes rise-in {

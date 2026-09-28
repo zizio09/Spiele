@@ -12,7 +12,7 @@ import type {
 } from './sudokuTypes'
 
 export const SUDOKU_STORAGE_KEY = 'tagesrunde-sudoku'
-export const DIFFICULTIES: SudokuDifficulty[] = ['leicht', 'mittel', 'schwer']
+export const DIFFICULTIES: SudokuDifficulty[] = ['leicht', 'mittel', 'schwer', 'sehr-schwer']
 
 function parseDigit(ch: string): SudokuDigit | null {
   const n = Number(ch)
@@ -343,7 +343,7 @@ export function checkEntries(state: SudokuState): SudokuState {
   }
 
   if (filled === 0) {
-    return { ...state, grid, message: 'Noch keine eigenen Einträge zum Prüfen.' }
+    return { ...state, grid, message: 'Noch keine eigenen Einträge zum Anzeigen.' }
   }
   if (wrong === 0) {
     if (isGridCompleteAndCorrect(grid, state.solution)) {
@@ -354,12 +354,12 @@ export function checkEntries(state: SudokuState): SudokuState {
         message: 'Alles korrekt – Sudoku gelöst!',
       }
     }
-    return { ...state, grid, message: 'Alle bisherigen Einträge sind korrekt.' }
+    return { ...state, grid, message: 'Keine Fehler – alle bisherigen Einträge stimmen.' }
   }
   return {
     ...state,
     grid,
-    message: `${wrong} Einträg${wrong === 1 ? '' : 'e'} ${wrong === 1 ? 'ist' : 'sind'} falsch markiert.`,
+    message: `${wrong} Fehler ${wrong === 1 ? 'ist' : 'sind'} markiert.`,
   }
 }
 

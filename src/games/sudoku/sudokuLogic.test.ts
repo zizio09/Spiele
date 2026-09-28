@@ -13,7 +13,7 @@ import type { SudokuDigit } from './sudokuTypes'
 
 describe('Sudoku', () => {
   it('hat für Beispielrätsel genau eine Lösung', () => {
-    for (const diff of ['leicht', 'mittel', 'schwer'] as const) {
+    for (const diff of ['leicht', 'mittel', 'schwer', 'sehr-schwer'] as const) {
       const puzzle = SUDOKU_PUZZLES[diff][0]
       expect(countSolutions(puzzle.puzzle)).toBe(1)
       expect(puzzle.solution).toHaveLength(81)

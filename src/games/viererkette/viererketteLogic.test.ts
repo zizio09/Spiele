@@ -32,7 +32,7 @@ describe('Viererkette', () => {
     expect(state.feedback).toBe('correct')
   })
 
-  it('meldet Knapp daneben bei drei richtigen Begriffen', () => {
+  it('meldet Einen daneben bei drei richtigen Begriffen', () => {
     let state = createViererketteState('2024-01-01')
     const cats = Object.keys(state.groups)
     const three = state.groups[cats[0]].terms.slice(0, 3)
@@ -43,17 +43,17 @@ describe('Viererkette', () => {
     expect(state.feedback).toBe('one-off')
     expect(state.mistakes).toBe(1)
     expect(state.points).toBe(START_POINTS - POINTS_PER_MISTAKE)
-    expect(state.message).toMatch(/Knapp daneben/)
+    expect(state.message).toMatch(/Einen daneben/)
   })
 
-  it('meldet Kein Treffer bei weniger Überlappung', () => {
+  it('meldet Kein Match bei weniger Überlappung', () => {
     let state = createViererketteState('2024-01-01')
     const cats = Object.keys(state.groups)
     const picks = cats.map((cat) => state.groups[cat].terms[0])
     state = { ...state, selected: picks }
     state = submitGroup(state)
     expect(state.feedback).toBe('no-match')
-    expect(state.message).toMatch(/Kein Treffer/)
+    expect(state.message).toMatch(/Kein Match/)
   })
 
   it('endet nach 20 Fehlversuchen', () => {
@@ -70,7 +70,7 @@ describe('Viererkette', () => {
     expect(state.solved).toHaveLength(4)
   })
 
-  it('vervollständigt die letzte Gruppe automatisch', () => {
+  it('vervollständigt die letzte Gruppe nicht automatisch', () => {
     let state = createViererketteState('2024-01-01')
     const categories = Object.keys(state.groups)
     for (let i = 0; i < 3; i++) {
@@ -78,6 +78,11 @@ describe('Viererkette', () => {
       state = { ...state, selected: [...terms] }
       state = submitGroup(state)
     }
+    expect(state.status).toBe('playing')
+    expect(state.solved).toHaveLength(3)
+    expect(state.board).toHaveLength(4)
+    state = { ...state, selected: [...state.board] }
+    state = submitGroup(state)
     expect(state.status).toBe('won')
     expect(state.solved).toHaveLength(4)
     expect(state.board).toHaveLength(0)

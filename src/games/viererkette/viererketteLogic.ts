@@ -211,31 +211,6 @@ export function bestOverlap(terms: string[], state: ViererketteState): number {
   return best
 }
 
-function autoCompleteLastGroup(state: ViererketteState): ViererketteState {
-  if (state.board.length !== 4 || state.status !== 'playing') return state
-  const category = findMatchingCategory(state.board, state.groups)
-  if (!category) return state
-  const meta = state.groups[category]
-  const solved: SolvedGroup[] = [
-    ...state.solved,
-    {
-      category,
-      explanation: meta.explanation,
-      difficulty: meta.difficulty,
-      terms: [...meta.terms],
-    },
-  ]
-  return {
-    ...state,
-    board: [],
-    selected: [],
-    solved,
-    status: 'won',
-    feedback: 'correct',
-    message: 'Alle Gruppen gefunden!',
-  }
-}
-
 export function submitGroup(state: ViererketteState): ViererketteState {
   if (state.status !== 'playing') return state
   if (state.selected.length !== 4) {
@@ -259,18 +234,17 @@ export function submitGroup(state: ViererketteState): ViererketteState {
       },
     ]
     const board = state.board.filter((t) => !state.selected.includes(t))
-    let next: ViererketteState = {
+    const next: ViererketteState = {
       ...state,
       board,
       selected: [],
       solved,
       feedback: 'correct',
       message: `${meta.category}: ${meta.explanation}`,
+      status: board.length === 0 ? 'won' : 'playing',
     }
     if (board.length === 0) {
-      next = { ...next, status: 'won', message: 'Alle Gruppen gefunden!' }
-    } else if (board.length === 4) {
-      next = autoCompleteLastGroup(next)
+      return { ...next, message: 'Alle Gruppen gefunden!' }
     }
     return next
   }
@@ -280,9 +254,7 @@ export function submitGroup(state: ViererketteState): ViererketteState {
   const points = Math.max(0, state.points - POINTS_PER_MISTAKE)
   const feedback: FeedbackKind = overlap === 3 ? 'one-off' : 'no-match'
   const hint =
-    feedback === 'one-off'
-      ? 'Knapp daneben – drei Begriffe gehören zusammen.'
-      : 'Kein Treffer.'
+    feedback === 'one-off' ? 'Einen daneben …' : 'Kein Match'
 
   if (mistakes >= MAX_MISTAKES) {
     const remaining = Object.entries(state.groups)

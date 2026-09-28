@@ -22,6 +22,7 @@ const DIFF_LABEL: Record<SudokuDifficulty, string> = {
   leicht: 'Leicht',
   mittel: 'Mittel',
   schwer: 'Schwer',
+  'sehr-schwer': 'Sehr schwer',
 }
 
 export function SudokuPage() {
@@ -69,7 +70,7 @@ export function SudokuPage() {
         <h1>Sudoku</h1>
         <p>
           Fülle das Gitter so, dass jede Zeile, Spalte und jeder 3×3-Block die Ziffern 1 bis 9
-          genau einmal enthält. Kein Zeit- oder Fehlerlimit.
+          genau einmal enthält. Hilfszahlen helfen beim Notieren. Kein Zeit- oder Fehlerlimit.
         </p>
       </header>
 
@@ -173,7 +174,7 @@ export function SudokuPage() {
             aria-pressed={state.notesMode}
             onClick={() => setState((s) => toggleNotesMode(s))}
           >
-            Notizen
+            Hilfszahlen
           </button>
           <button type="button" className="btn btn--ghost" onClick={() => setState((s) => eraseCell(s))}>
             Löschen
@@ -186,7 +187,7 @@ export function SudokuPage() {
             className="btn btn--primary"
             onClick={() => setState((s) => checkEntries(s))}
           >
-            Prüfen
+            Fehler anzeigen
           </button>
         </div>
       </div>
