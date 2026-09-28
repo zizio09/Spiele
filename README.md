@@ -28,18 +28,21 @@ npm run build
 
 ## Siegesfeier (Hund)
 
-Die Wedel-Frames liegen als WebP (~512px, ~40 KB) in `public/celebrations/`, plus `wag-sprite.webp` (vier Frames: links→mitte→rechts→mitte) für die CSS-Animation. Originale Cutouts (~1.7 MB PNG) gehören nach `assets/celebrations-source/` (gitignored). Neu erzeugen:
+Wedeln läuft über `public/celebrations/wag-animated.gif` (links→mitte→rechts→mitte, ~5 fps).
+Einzel-WebPs (~40 KB) bleiben für reduced-motion und die Vorschau-Leiste.
+Originale Cutouts (~1.7 MB PNG) gehören nach `assets/celebrations-source/` (gitignored). Neu erzeugen:
 
 ```bash
 npm run optimize:celebrations
 ```
 
-**Animation prüfen ohne Spiel:** [http://127.0.0.1:43141/dev/celebration](http://127.0.0.1:43141/dev/celebration)
+**Animation prüfen ohne Spiel:** [http://127.0.0.1:43141/preview/celebration](http://127.0.0.1:43141/preview/celebration)  
+Verlust-Variante: `/preview/celebration?loss=1` · auch über **„Vorschau Feier“** auf der Startseite.
 
-Automatischer Sichtcheck (Pixel-Diff der Frames, Preview muss laufen):
+Automatischer Sichtcheck (Pixel-Diff, Preview muss laufen):
 
 ```bash
-npm run preview -- --host 127.0.0.1 --port 43141
+npm run preview -- --host 0.0.0.0 --port 43141
 npm run verify:wag
 ```
 

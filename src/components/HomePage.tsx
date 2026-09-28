@@ -44,6 +44,9 @@ export function HomePage() {
             <Link className="btn btn--ghost" to="/viererkette">
               Zur Viererkette
             </Link>
+            <Link className="btn btn--ghost" to="/preview/celebration">
+              Vorschau Feier
+            </Link>
           </div>
         </div>
       </section>

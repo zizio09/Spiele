@@ -36,16 +36,20 @@ describe('WinCelebration', () => {
     vi.restoreAllMocks()
   })
 
-  it('setzt is-wagging nach Sprite-Preload wenn Motion erlaubt ist', async () => {
+  it('zeigt animiertes GIF wenn Motion erlaubt ist', async () => {
     mockMatchMedia(false)
     mockImagePreload()
 
     render(<WinCelebration outcome="won" />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('dog-sprite')).toHaveClass('is-wagging')
+      expect(screen.getByTestId('dog-animated')).toBeInTheDocument()
     })
     expect(screen.getByRole('status')).toHaveAttribute('data-wagging', 'true')
+    expect(screen.getByTestId('dog-animated')).toHaveAttribute(
+      'src',
+      expect.stringContaining('wag-animated.gif'),
+    )
   })
 
   it('bleibt statisch bei prefers-reduced-motion', async () => {
@@ -55,8 +59,20 @@ describe('WinCelebration', () => {
     render(<WinCelebration outcome="won" />)
 
     await waitFor(() => {
-      expect(screen.getByTestId('dog-sprite')).toHaveClass('is-static')
+      expect(screen.getByTestId('dog-static')).toBeInTheDocument()
     })
     expect(screen.getByRole('status')).toHaveAttribute('data-wagging', 'false')
+  })
+
+  it('forceMotion wedelt auch bei reduced-motion', async () => {
+    mockMatchMedia(true)
+    mockImagePreload()
+
+    render(<WinCelebration outcome="won" forceMotion />)
+
+    await waitFor(() => {
+      expect(screen.getByTestId('dog-animated')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('status')).toHaveAttribute('data-wagging', 'true')
   })
 })

@@ -1,52 +1,37 @@
-import { useEffect, useState } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { WinCelebration } from './WinCelebration'
 
 /**
- * Dev-only preview: open /dev/celebration to inspect the dog wag
- * without finishing a game.
+ * Vorschau der Siegesfeier ohne Spiel.
+ * /preview/celebration — Gewinn
+ * /preview/celebration?loss=1 — Runde beendet
  */
 export function CelebrationPreviewPage() {
-  const [outcome, setOutcome] = useState<'won' | 'finished'>('won')
-  const [reduceMotion, setReduceMotion] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    const apply = () => setReduceMotion(mq.matches)
-    apply()
-    mq.addEventListener('change', apply)
-    return () => mq.removeEventListener('change', apply)
-  }, [])
+  const [params] = useSearchParams()
+  const loss = params.get('loss') === '1' || params.get('loss') === 'true'
+  const forceMotion = params.get('force') !== '0'
+  const outcome: 'won' | 'finished' = loss ? 'finished' : 'won'
 
   return (
     <div className="game-page celebration-preview">
       <header className="game-header">
         <h1>Feier-Vorschau</h1>
         <p>
-          Testseite für den wedelnden Hund – kein Spiel nötig. Adresse:{' '}
-          <code>/dev/celebration</code>
+          Testseite für den wedelnden Hund – kein Spiel nötig.{' '}
+          <Link to="/preview/celebration">Gewinn</Link>
+          {' · '}
+          <Link to="/preview/celebration?loss=1">Runde beendet</Link>
         </p>
       </header>
 
-      <div className="celebration-preview__controls">
-        <label>
-          Ergebnis{' '}
-          <select
-            value={outcome}
-            onChange={(e) => setOutcome(e.target.value as 'won' | 'finished')}
-          >
-            <option value="won">Geschafft</option>
-            <option value="finished">Runde beendet</option>
-          </select>
-        </label>
-        <p className="celebration-preview__status" data-testid="motion-status">
-          System: prefers-reduced-motion = <strong>{reduceMotion ? 'reduce' : 'no-preference'}</strong>
-          {reduceMotion
-            ? ' → Hund bleibt in der Mitte (statisch).'
-            : ' → Hund muss sichtbar wedeln.'}
-        </p>
-      </div>
+      <p className="celebration-preview__status" data-testid="motion-status">
+        {forceMotion
+          ? 'Vorschau erzwingt Wedeln (auch bei reduced-motion).'
+          : 'System-Einstellung für Bewegung wird respektiert.'}{' '}
+        Adresse: <code>/preview/celebration{loss ? '?loss=1' : ''}</code>
+      </p>
 
-      <WinCelebration outcome={outcome} />
+      <WinCelebration outcome={outcome} forceMotion={forceMotion} />
 
       <section className="celebration-preview__frames" aria-label="Einzelbilder">
         <h2>Einzelbilder (links · mitte · rechts)</h2>

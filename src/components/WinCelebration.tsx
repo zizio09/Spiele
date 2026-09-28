@@ -1,22 +1,31 @@
 import { useEffect, useState } from 'react'
 
-/** Vier-Frame-Sprite: links → mitte → rechts → mitte (CSS steps-Animation). */
-export const WAG_SPRITE_SRC = '/celebrations/wag-sprite.webp'
-export const WAG_FRAME_MS = 200
-export const WAG_FRAME_COUNT = 4
+/** Einzelbilder (Vorschau / reduced-motion). */
+export const WAG_FRAMES = {
+  left: '/celebrations/wag-left.webp',
+  middle: '/celebrations/wag-middle.webp',
+  right: '/celebrations/wag-right.webp',
+} as const
+
+/**
+ * Animiertes GIF: links → mitte → rechts → mitte (5 fps).
+ * Native Browser-Animation – kein CSS-Sprite, kein React-src-Swap.
+ */
+export const WAG_ANIMATED_SRC = '/celebrations/wag-animated.gif'
 
 type Props = {
   outcome: 'won' | 'finished'
+  /** Vorschau: prefers-reduced-motion ignorieren und trotzdem wedeln. */
+  forceMotion?: boolean
 }
 
 /**
  * Ruhige Sieges-/Abschlussfeier mit wedelndem Hund.
- * Wedeln per CSS-Sprite (kein React-src-Swap) – zuverlässig und leicht.
- * Bei prefers-reduced-motion: statisches Mittelbild.
+ * Motion: animiertes GIF. Reduced-motion (außer forceMotion): statisches Mittelbild.
  */
-export function WinCelebration({ outcome }: Props) {
+export function WinCelebration({ outcome, forceMotion = false }: Props) {
   const [reduceMotion, setReduceMotion] = useState(false)
-  const [spriteReady, setSpriteReady] = useState(false)
+  const [ready, setReady] = useState(false)
 
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -28,14 +37,20 @@ export function WinCelebration({ outcome }: Props) {
 
   useEffect(() => {
     let cancelled = false
-    const img = new Image()
-    img.onload = () => {
-      if (!cancelled) setSpriteReady(true)
-    }
-    img.onerror = () => {
-      if (!cancelled) setSpriteReady(true)
-    }
-    img.src = WAG_SPRITE_SRC
+    const imgs = [WAG_ANIMATED_SRC, WAG_FRAMES.middle, WAG_FRAMES.left, WAG_FRAMES.right]
+    Promise.all(
+      imgs.map(
+        (src) =>
+          new Promise<void>((resolve) => {
+            const img = new Image()
+            img.onload = () => resolve()
+            img.onerror = () => resolve()
+            img.src = src
+          }),
+      ),
+    ).then(() => {
+      if (!cancelled) setReady(true)
+    })
     return () => {
       cancelled = true
     }
@@ -47,7 +62,8 @@ export function WinCelebration({ outcome }: Props) {
       ? 'Der Hund freut sich mit dir.'
       : 'Beim nächsten Mal klappt’s bestimmt.'
 
-  const wagging = spriteReady && !reduceMotion
+  const allowMotion = forceMotion || !reduceMotion
+  const wagging = ready && allowMotion
 
   return (
     <div
@@ -55,9 +71,10 @@ export function WinCelebration({ outcome }: Props) {
       role="status"
       aria-live="polite"
       data-wagging={wagging ? 'true' : 'false'}
-      data-reduce-motion={reduceMotion ? 'true' : 'false'}
+      data-reduce-motion={!forceMotion && reduceMotion ? 'true' : 'false'}
+      data-ready={ready ? 'true' : 'false'}
     >
-      {outcome === 'won' && !reduceMotion && (
+      {outcome === 'won' && allowMotion && (
         <div className="win-celebration__sparkles" aria-hidden="true">
           <span />
           <span />
@@ -68,12 +85,29 @@ export function WinCelebration({ outcome }: Props) {
         </div>
       )}
       <div className="win-celebration__dog-stage">
-        <div
-          className={`win-celebration__dog-sprite ${wagging ? 'is-wagging' : 'is-static'}`}
-          role="img"
-          aria-label="Hund wedelt mit dem Schwanz"
-          data-testid="dog-sprite"
-        />
+        {wagging ? (
+          <img
+            className="win-celebration__dog-img is-active"
+            src={WAG_ANIMATED_SRC}
+            alt="Hund wedelt mit dem Schwanz"
+            width={512}
+            height={512}
+            decoding="async"
+            draggable={false}
+            data-testid="dog-animated"
+          />
+        ) : (
+          <img
+            className="win-celebration__dog-img is-active"
+            src={WAG_FRAMES.middle}
+            alt="Hund"
+            width={512}
+            height={512}
+            decoding="async"
+            draggable={false}
+            data-testid="dog-static"
+          />
+        )}
       </div>
       <p className="win-celebration__title">{title}</p>
       <p className="win-celebration__subtitle">{subtitle}</p>

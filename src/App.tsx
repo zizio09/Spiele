@@ -16,7 +16,8 @@ export default function App() {
         <Route path="viererkette" element={<ViererkettePage />} />
         <Route path="sudoku" element={<SudokuPage />} />
         <Route path="paarsuche" element={<PaarsuchePage />} />
-        <Route path="dev/celebration" element={<CelebrationPreviewPage />} />
+        <Route path="preview/celebration" element={<CelebrationPreviewPage />} />
+        <Route path="dev/celebration" element={<Navigate to="/preview/celebration" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
