@@ -21,7 +21,7 @@ describe('Paarsuche', () => {
     for (const n of counts.values()) expect(n).toBe(2)
   })
 
-  it('hält Treffer offen und zählt Züge', () => {
+  it('hält Treffer als gefunden und zählt Züge', () => {
     let state = createPaarsucheState('2024-01-01')
     const target = state.cards[0].imageId
     const pair = state.cards.filter((c) => c.imageId === target)
@@ -31,6 +31,8 @@ describe('Paarsuche', () => {
     state = r.state
     expect(state.moves).toBe(1)
     expect(state.cards.filter((c) => c.matched)).toHaveLength(2)
+    expect(state.foundPairs).toEqual([target])
+    expect(state.lastFoundId).toBe(target)
     expect(r.pendingMismatch).toBeNull()
   })
 
@@ -69,6 +71,7 @@ describe('Paarsuche', () => {
     }
     expect(state.status).toBe('won')
     expect(state.cards.every((c) => c.matched)).toBe(true)
+    expect(state.foundPairs).toHaveLength(8)
     expect(state.moves).toBe(8)
   })
 })

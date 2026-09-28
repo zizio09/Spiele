@@ -7,122 +7,122 @@ export interface PaarsuchePuzzle {
 export const PAARSUCHE_PUZZLES: readonly PaarsuchePuzzle[] = [
   {
     id: 'ps-01',
-    imageIds: ['sonne', 'mond', 'stern', 'baum', 'fisch', 'herz', 'krone', 'schloss'],
+    imageIds: ['sonne', 'katze', 'apfel', 'haus', 'fisch', 'herz', 'krone', 'ballon'],
   },
   {
     id: 'ps-02',
-    imageIds: ['anker', 'blatt', 'pilz', 'boot', 'sonne', 'mond', 'fisch', 'herz'],
+    imageIds: ['anker', 'schmetterling', 'pilz', 'boot', 'tasse', 'mond', 'gitarre', 'regenschirm'],
   },
   {
     id: 'ps-03',
-    imageIds: ['krone', 'schloss', 'anker', 'blatt', 'pilz', 'boot', 'stern', 'baum'],
+    imageIds: ['krone', 'schloss', 'katze', 'blatt', 'apfel', 'haus', 'stern', 'baum'],
   },
   {
     id: 'ps-04',
-    imageIds: ['sonne', 'anker', 'herz', 'pilz', 'mond', 'boot', 'krone', 'blatt'],
+    imageIds: ['sonne', 'anker', 'herz', 'pilz', 'ballon', 'boot', 'tasse', 'schmetterling'],
   },
   {
     id: 'ps-05',
-    imageIds: ['stern', 'fisch', 'schloss', 'baum', 'sonne', 'pilz', 'anker', 'herz'],
+    imageIds: ['stern', 'fisch', 'schloss', 'gitarre', 'sonne', 'haus', 'anker', 'herz'],
   },
   {
     id: 'ps-06',
-    imageIds: ['boot', 'mond', 'blatt', 'krone', 'fisch', 'schloss', 'stern', 'pilz'],
+    imageIds: ['boot', 'mond', 'blatt', 'krone', 'katze', 'regenschirm', 'apfel', 'ballon'],
   },
   {
     id: 'ps-07',
-    imageIds: ['herz', 'baum', 'anker', 'sonne', 'boot', 'mond', 'schloss', 'blatt'],
+    imageIds: ['herz', 'baum', 'tasse', 'sonne', 'boot', 'schmetterling', 'schloss', 'gitarre'],
   },
   {
     id: 'ps-08',
-    imageIds: ['pilz', 'krone', 'fisch', 'stern', 'baum', 'anker', 'herz', 'boot'],
+    imageIds: ['pilz', 'krone', 'fisch', 'stern', 'haus', 'anker', 'katze', 'regenschirm'],
   },
   {
     id: 'ps-09',
-    imageIds: ['schloss', 'sonne', 'blatt', 'mond', 'krone', 'fisch', 'pilz', 'stern'],
+    imageIds: ['schloss', 'sonne', 'blatt', 'mond', 'ballon', 'apfel', 'tasse', 'stern'],
   },
   {
     id: 'ps-10',
-    imageIds: ['baum', 'herz', 'boot', 'anker', 'sonne', 'schloss', 'mond', 'pilz'],
+    imageIds: ['baum', 'herz', 'boot', 'gitarre', 'sonne', 'schmetterling', 'katze', 'pilz'],
   },
   {
     id: 'ps-11',
-    imageIds: ['stern', 'blatt', 'krone', 'fisch', 'anker', 'herz', 'boot', 'sonne'],
+    imageIds: ['stern', 'haus', 'krone', 'fisch', 'anker', 'regenschirm', 'ballon', 'apfel'],
   },
   {
     id: 'ps-12',
-    imageIds: ['mond', 'pilz', 'schloss', 'baum', 'blatt', 'krone', 'fisch', 'anker'],
+    imageIds: ['mond', 'pilz', 'schloss', 'tasse', 'blatt', 'gitarre', 'katze', 'anker'],
   },
   {
     id: 'ps-13',
-    imageIds: ['sonne', 'stern', 'herz', 'boot', 'mond', 'baum', 'pilz', 'schloss'],
+    imageIds: ['sonne', 'stern', 'herz', 'boot', 'schmetterling', 'haus', 'ballon', 'schloss'],
   },
   {
     id: 'ps-14',
-    imageIds: ['anker', 'krone', 'blatt', 'fisch', 'sonne', 'herz', 'mond', 'boot'],
+    imageIds: ['anker', 'krone', 'apfel', 'fisch', 'tasse', 'herz', 'mond', 'regenschirm'],
   },
   {
     id: 'ps-15',
-    imageIds: ['pilz', 'schloss', 'stern', 'baum', 'anker', 'blatt', 'krone', 'fisch'],
+    imageIds: ['pilz', 'schloss', 'stern', 'baum', 'gitarre', 'katze', 'krone', 'ballon'],
   },
   {
     id: 'ps-16',
-    imageIds: ['boot', 'herz', 'sonne', 'mond', 'stern', 'pilz', 'schloss', 'anker'],
+    imageIds: ['boot', 'herz', 'sonne', 'haus', 'schmetterling', 'apfel', 'tasse', 'anker'],
   },
   {
     id: 'ps-17',
-    imageIds: ['blatt', 'baum', 'krone', 'fisch', 'herz', 'boot', 'sonne', 'pilz'],
+    imageIds: ['blatt', 'baum', 'krone', 'fisch', 'regenschirm', 'gitarre', 'sonne', 'pilz'],
   },
   {
     id: 'ps-18',
-    imageIds: ['schloss', 'anker', 'mond', 'stern', 'baum', 'blatt', 'krone', 'boot'],
+    imageIds: ['schloss', 'anker', 'mond', 'katze', 'ballon', 'blatt', 'haus', 'boot'],
   },
   {
     id: 'ps-19',
-    imageIds: ['fisch', 'herz', 'sonne', 'pilz', 'anker', 'schloss', 'mond', 'blatt'],
+    imageIds: ['fisch', 'herz', 'sonne', 'pilz', 'tasse', 'schmetterling', 'apfel', 'stern'],
   },
   {
     id: 'ps-20',
-    imageIds: ['krone', 'boot', 'stern', 'baum', 'herz', 'fisch', 'sonne', 'anker'],
+    imageIds: ['krone', 'boot', 'stern', 'gitarre', 'herz', 'haus', 'regenschirm', 'anker'],
   },
   {
     id: 'ps-21',
-    imageIds: ['mond', 'schloss', 'blatt', 'pilz', 'boot', 'krone', 'stern', 'herz'],
+    imageIds: ['mond', 'schloss', 'blatt', 'ballon', 'katze', 'krone', 'apfel', 'tasse'],
   },
   {
     id: 'ps-22',
-    imageIds: ['sonne', 'baum', 'anker', 'fisch', 'pilz', 'mond', 'schloss', 'krone'],
+    imageIds: ['sonne', 'baum', 'anker', 'fisch', 'schmetterling', 'gitarre', 'haus', 'pilz'],
   },
   {
     id: 'ps-23',
-    imageIds: ['herz', 'stern', 'boot', 'blatt', 'baum', 'sonne', 'anker', 'pilz'],
+    imageIds: ['herz', 'stern', 'boot', 'regenschirm', 'katze', 'ballon', 'apfel', 'schloss'],
   },
   {
     id: 'ps-24',
-    imageIds: ['fisch', 'krone', 'mond', 'schloss', 'blatt', 'herz', 'boot', 'stern'],
+    imageIds: ['fisch', 'krone', 'mond', 'tasse', 'blatt', 'gitarre', 'haus', 'stern'],
   },
   {
     id: 'ps-25',
-    imageIds: ['anker', 'sonne', 'pilz', 'baum', 'krone', 'fisch', 'mond', 'blatt'],
+    imageIds: ['anker', 'sonne', 'pilz', 'schmetterling', 'krone', 'ballon', 'katze', 'blatt'],
   },
   {
     id: 'ps-26',
-    imageIds: ['boot', 'schloss', 'herz', 'stern', 'sonne', 'anker', 'pilz', 'baum'],
+    imageIds: ['boot', 'schloss', 'herz', 'apfel', 'tasse', 'regenschirm', 'gitarre', 'baum'],
   },
   {
     id: 'ps-27',
-    imageIds: ['blatt', 'fisch', 'krone', 'mond', 'herz', 'schloss', 'stern', 'boot'],
+    imageIds: ['blatt', 'fisch', 'krone', 'haus', 'herz', 'ballon', 'stern', 'schmetterling'],
   },
   {
     id: 'ps-28',
-    imageIds: ['baum', 'anker', 'sonne', 'pilz', 'blatt', 'krone', 'fisch', 'herz'],
+    imageIds: ['baum', 'anker', 'sonne', 'pilz', 'katze', 'tasse', 'apfel', 'gitarre'],
   },
   {
     id: 'ps-29',
-    imageIds: ['stern', 'boot', 'mond', 'schloss', 'anker', 'sonne', 'baum', 'blatt'],
+    imageIds: ['stern', 'boot', 'mond', 'schloss', 'regenschirm', 'ballon', 'haus', 'blatt'],
   },
   {
     id: 'ps-30',
-    imageIds: ['pilz', 'herz', 'krone', 'fisch', 'boot', 'mond', 'schloss', 'stern'],
+    imageIds: ['pilz', 'herz', 'krone', 'fisch', 'schmetterling', 'katze', 'apfel', 'tasse'],
   },
 ]

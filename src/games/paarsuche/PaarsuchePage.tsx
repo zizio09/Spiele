@@ -46,53 +46,99 @@ export function PaarsuchePage() {
       <header className="game-header">
         <h1>Paarsuche</h1>
         <p>
-          Decke zwei Karten pro Zug auf. Gleiche Bilder bleiben sichtbar. Ungleiche Karten drehen
-          sich nach einer Sekunde zurück.
+          Decke zwei Karten pro Zug auf. Gleiche Bilder bleiben sichtbar – und wandern nach links zu
+          den gefundenen Paaren. Ungleiche Karten drehen sich nach einer Sekunde zurück.
         </p>
       </header>
 
       <RoundBadge mode={state.mode} />
 
-      <p className="ps-moves" aria-live="polite">
-        Züge: {state.moves}
-      </p>
+      <div className="ps-layout">
+        <aside className="ps-found" aria-label="Gefundene Paare">
+          <h2 className="ps-found__title">Gefundene Paare</h2>
+          {state.foundPairs.length === 0 ? (
+            <p className="ps-found__empty">Noch keine. Finde das erste Paar!</p>
+          ) : (
+            <ul className="ps-found__list">
+              {state.foundPairs.map((imageId, index) => {
+                const image = getPairImage(imageId)
+                const isNewest = imageId === state.lastFoundId && index === state.foundPairs.length - 1
+                return (
+                  <li
+                    key={`${imageId}-${index}`}
+                    className={`ps-found__item ${isNewest ? 'is-new' : ''}`}
+                  >
+                    <span className="ps-found__thumb" style={{ background: image.tile }} aria-hidden="true">
+                      {image.render(`found-${imageId}-${index}`)}
+                    </span>
+                    <span className="ps-found__label">{image.label}</span>
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+        </aside>
 
-      {state.message && (
-        <p className="game-message" role="status">
-          {state.message}
-        </p>
-      )}
+        <div className="ps-main">
+          <p className="ps-moves" aria-live="polite">
+            Züge: {state.moves}
+          </p>
 
-      {state.status === 'won' && (
-        <>
-          <WinCelebration outcome="won" />
-          <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
-        </>
-      )}
+          {state.message && (
+            <p className="game-message" role="status">
+              {state.message}
+            </p>
+          )}
 
-      <div className="ps-grid" role="list" aria-label="Kartenfeld">
-        {state.cards.map((card) => {
-          const image = getPairImage(card.imageId)
-          const open = card.faceUp || card.matched
-          return (
-            <button
-              key={card.id}
-              type="button"
-              role="listitem"
-              className={`ps-card ${open ? 'is-open' : ''} ${card.matched ? 'is-matched' : ''}`}
-              disabled={state.locked || card.faceUp || card.matched || state.status === 'won'}
-              aria-label={open ? image.label : 'Verdeckte Karte'}
-              onClick={() => onFlip(card.id)}
-            >
-              <span className="ps-card__inner">
-                <span className="ps-card__back" aria-hidden="true">
-                  ?
-                </span>
-                <span className="ps-card__front">{image.render(`ps-${card.id}`)}</span>
-              </span>
-            </button>
-          )
-        })}
+          {state.status === 'won' && (
+            <>
+              <WinCelebration outcome="won" />
+              <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
+            </>
+          )}
+
+          <div className="ps-grid" role="list" aria-label="Kartenfeld">
+            {state.cards.map((card) => {
+              if (card.matched) {
+                return (
+                  <div
+                    key={card.id}
+                    className="ps-slot ps-slot--empty"
+                    role="listitem"
+                    aria-label="Leeres Feld – Paar gefunden"
+                  />
+                )
+              }
+
+              const image = getPairImage(card.imageId)
+              const open = card.faceUp
+              return (
+                <button
+                  key={card.id}
+                  type="button"
+                  role="listitem"
+                  className={`ps-card ${open ? 'is-open' : ''}`}
+                  disabled={state.locked || card.faceUp || state.status === 'won'}
+                  aria-label={open ? image.label : 'Verdeckte Karte'}
+                  onClick={() => onFlip(card.id)}
+                >
+                  <span className="ps-card__inner">
+                    <span className="ps-card__back" aria-hidden="true">
+                      ?
+                    </span>
+                    <span
+                      className="ps-card__front"
+                      style={{ background: image.tile }}
+                      aria-hidden={!open}
+                    >
+                      {image.render(`ps-${card.id}`)}
+                    </span>
+                  </span>
+                </button>
+              )
+            })}
+          </div>
+        </div>
       </div>
     </div>
   )

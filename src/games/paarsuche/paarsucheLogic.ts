@@ -21,6 +21,10 @@ export interface PaarsucheState {
   puzzleId: string
   cards: PaarsucheCard[]
   openIds: string[]
+  /** Bild-IDs in der Reihenfolge der Funde (für die linke Leiste). */
+  foundPairs: string[]
+  /** Zuletzt gefundenes Paar – steuert die Einblend-Animation. */
+  lastFoundId: string | null
   moves: number
   status: PaarsucheStatus
   locked: boolean
@@ -66,6 +70,8 @@ function buildPaarsucheState(
     puzzleId: puzzle.id,
     cards,
     openIds: [],
+    foundPairs: [],
+    lastFoundId: null,
     moves: 0,
     status: 'playing',
     locked: false,
@@ -88,6 +94,9 @@ export function loadPaarsucheState(dateStr: string = getBerlinDateString()): Paa
   const saved = loadDailyProgress<PaarsucheState>(PAARSUCHE_STORAGE_KEY, dateStr)
   const puzzle = getDailyPaarsuchePuzzle(dateStr)
   if (saved && saved.puzzleId === puzzle.id && (saved.mode ?? 'daily') === 'daily') {
+    const foundPairs =
+      saved.foundPairs ??
+      [...new Set(saved.cards.filter((c) => c.matched).map((c) => c.imageId))]
     return {
       ...saved,
       mode: 'daily',
@@ -95,6 +104,8 @@ export function loadPaarsucheState(dateStr: string = getBerlinDateString()): Paa
       locked: false,
       message: null,
       openIds: saved.openIds?.length === 2 ? [] : (saved.openIds ?? []),
+      foundPairs,
+      lastFoundId: null,
     }
   }
   return createPaarsucheState(dateStr)
@@ -144,12 +155,15 @@ export function flipCard(state: PaarsucheState, cardId: string): FlipResult {
     const matchedCards = cards.map((c) =>
       c.id === aId || c.id === bId ? { ...c, matched: true, faceUp: true } : c,
     )
+    const foundPairs = [...state.foundPairs, a.imageId]
     const allMatched = matchedCards.every((c) => c.matched)
     return {
       state: {
         ...state,
         cards: matchedCards,
         openIds: [],
+        foundPairs,
+        lastFoundId: a.imageId,
         moves,
         status: allMatched ? 'won' : 'playing',
         locked: false,
