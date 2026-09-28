@@ -1,5 +1,4 @@
 import { Navigate, Route, Routes } from 'react-router-dom'
-import { CelebrationPreviewPage } from './components/CelebrationPreviewPage'
 import { HomePage } from './components/HomePage'
 import { Layout } from './components/Layout'
 import { PaarsuchePage } from './games/paarsuche/PaarsuchePage'
@@ -16,8 +15,6 @@ export default function App() {
         <Route path="viererkette" element={<ViererkettePage />} />
         <Route path="sudoku" element={<SudokuPage />} />
         <Route path="paarsuche" element={<PaarsuchePage />} />
-        <Route path="preview/celebration" element={<CelebrationPreviewPage />} />
-        <Route path="dev/celebration" element={<Navigate to="/preview/celebration" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>

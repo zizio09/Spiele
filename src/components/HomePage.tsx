@@ -115,9 +115,6 @@ export function HomePage() {
         <p className="spiele-header__lead">
           Vier Tagesrätsel – groß, klar und ohne Werbung. Wähle ein Spiel.
         </p>
-        <p className="spiele-header__preview">
-          <Link to="/preview/celebration">Vorschau Feier</Link>
-        </p>
       </header>
 
       <section className="spiele-grid" aria-labelledby="spiele-title">

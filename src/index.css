@@ -215,18 +215,6 @@ button {
   color: var(--ink-soft);
 }
 
-.spiele-header__preview {
-  margin: 0.45rem 0 0;
-  font-size: 0.92rem;
-}
-
-.spiele-header__preview a {
-  color: var(--bg-mid);
-  font-weight: 600;
-  text-decoration: underline;
-  text-underline-offset: 0.15em;
-}
-
 .spiele-grid__list {
   list-style: none;
   margin: 0;
@@ -690,61 +678,6 @@ button {
     opacity: 0.7;
     transform: scale(1.15);
   }
-}
-
-.celebration-preview__controls {
-  display: grid;
-  gap: 0.65rem;
-  width: min(420px, 100%);
-  margin-bottom: 0.5rem;
-}
-
-.celebration-preview__controls select {
-  font: inherit;
-  font-size: 1.05rem;
-  padding: 0.35rem 0.5rem;
-  margin-left: 0.35rem;
-}
-
-.celebration-preview__status {
-  margin: 0;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
-}
-
-.celebration-preview__frames {
-  width: min(560px, 100%);
-  margin-top: 1.25rem;
-}
-
-.celebration-preview__frames h2 {
-  margin: 0 0 0.65rem;
-  font-family: var(--font-display);
-  font-size: 1.2rem;
-}
-
-.celebration-preview__strip {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.75rem;
-}
-
-.celebration-preview__strip figure {
-  margin: 0;
-  text-align: center;
-}
-
-.celebration-preview__strip img {
-  display: block;
-  width: 100%;
-  height: auto;
-  border-radius: 12px;
-  background: #000;
-}
-
-.celebration-preview__strip figcaption {
-  margin-top: 0.35rem;
-  font-weight: 700;
 }
 
 @media (prefers-reduced-motion: reduce) {
