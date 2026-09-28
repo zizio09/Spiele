@@ -13,17 +13,43 @@ import {
   type PaarsucheState,
 } from './paarsucheLogic'
 
+/** Kurz sichtbar lassen, bevor gefundene Karten vom Feld verschwinden. */
+const MATCH_LEAVE_MS = 550
+
 export function PaarsuchePage() {
   const [state, setState] = useState<PaarsucheState>(() => loadPaarsucheState())
+  const [clearedIds, setClearedIds] = useState<string[]>(() =>
+    loadPaarsucheState()
+      .cards.filter((c) => c.matched)
+      .map((c) => c.id),
+  )
   const timerRef = useRef<number | null>(null)
+  const leaveTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
     persistPaarsucheState(state)
   }, [state])
 
   useEffect(() => {
+    const pending = state.cards
+      .filter((c) => c.matched && !clearedIds.includes(c.id))
+      .map((c) => c.id)
+    if (pending.length === 0) return
+
+    if (leaveTimerRef.current != null) window.clearTimeout(leaveTimerRef.current)
+    leaveTimerRef.current = window.setTimeout(() => {
+      setClearedIds((prev) => [...prev, ...pending])
+    }, MATCH_LEAVE_MS)
+
+    return () => {
+      if (leaveTimerRef.current != null) window.clearTimeout(leaveTimerRef.current)
+    }
+  }, [state.cards, clearedIds])
+
+  useEffect(() => {
     return () => {
       if (timerRef.current != null) window.clearTimeout(timerRef.current)
+      if (leaveTimerRef.current != null) window.clearTimeout(leaveTimerRef.current)
     }
   }, [])
 
@@ -41,13 +67,18 @@ export function PaarsuchePage() {
     })
   }
 
+  const startExtra = () => {
+    setState((s) => createExtraPaarsucheState(s))
+    setClearedIds([])
+  }
+
   return (
     <div className="game-page paarsuche-page">
       <header className="game-header">
         <h1>Paarsuche</h1>
         <p>
-          Decke zwei Karten pro Zug auf. Gleiche Bilder bleiben sichtbar – und wandern nach links zu
-          den gefundenen Paaren. Ungleiche Karten drehen sich nach einer Sekunde zurück.
+          Decke zwei Karten pro Zug auf. Gleiche Bilder wandern nach links zu den gefundenen Paaren.
+          Ungleiche Karten drehen sich nach einer Sekunde zurück.
         </p>
       </header>
 
@@ -62,13 +93,18 @@ export function PaarsuchePage() {
             <ul className="ps-found__list">
               {state.foundPairs.map((imageId, index) => {
                 const image = getPairImage(imageId)
-                const isNewest = imageId === state.lastFoundId && index === state.foundPairs.length - 1
+                const isNewest =
+                  imageId === state.lastFoundId && index === state.foundPairs.length - 1
                 return (
                   <li
                     key={`${imageId}-${index}`}
                     className={`ps-found__item ${isNewest ? 'is-new' : ''}`}
                   >
-                    <span className="ps-found__thumb" style={{ background: image.tile }} aria-hidden="true">
+                    <span
+                      className="ps-found__thumb"
+                      style={{ background: image.tile }}
+                      aria-hidden="true"
+                    >
                       {image.render(`found-${imageId}-${index}`)}
                     </span>
                     <span className="ps-found__label">{image.label}</span>
@@ -93,13 +129,13 @@ export function PaarsuchePage() {
           {state.status === 'won' && (
             <>
               <WinCelebration outcome="won" />
-              <PlayAgainButton onClick={() => setState((s) => createExtraPaarsucheState(s))} />
+              <PlayAgainButton onClick={startExtra} />
             </>
           )}
 
           <div className="ps-grid" role="list" aria-label="Kartenfeld">
             {state.cards.map((card) => {
-              if (card.matched) {
+              if (card.matched && clearedIds.includes(card.id)) {
                 return (
                   <div
                     key={card.id}
@@ -111,14 +147,16 @@ export function PaarsuchePage() {
               }
 
               const image = getPairImage(card.imageId)
-              const open = card.faceUp
+              const open = card.faceUp || card.matched
               return (
                 <button
                   key={card.id}
                   type="button"
                   role="listitem"
-                  className={`ps-card ${open ? 'is-open' : ''}`}
-                  disabled={state.locked || card.faceUp || state.status === 'won'}
+                  className={`ps-card ${open ? 'is-open' : ''} ${card.matched ? 'is-matched' : ''}`}
+                  disabled={
+                    state.locked || card.faceUp || card.matched || state.status === 'won'
+                  }
                   aria-label={open ? image.label : 'Verdeckte Karte'}
                   onClick={() => onFlip(card.id)}
                 >

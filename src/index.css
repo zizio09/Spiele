@@ -817,6 +817,19 @@ button {
   }
 }
 
+@keyframes ps-match-flash {
+  0% {
+    transform: scale(1);
+  }
+  35% {
+    transform: scale(1.06);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.35;
+  }
+}
+
 @media (max-width: 720px) {
   .ps-layout {
     grid-template-columns: 1fr;
@@ -846,6 +859,10 @@ button {
 
 @media (prefers-reduced-motion: reduce) {
   .ps-found__item.is-new {
+    animation: none;
+  }
+
+  .ps-card.is-matched {
     animation: none;
   }
 }
@@ -1304,6 +1321,14 @@ button {
 
 .ps-card.is-open .ps-card__inner {
   transform: rotateY(180deg);
+}
+
+.ps-card.is-matched {
+  animation: ps-match-flash 0.55s ease;
+}
+
+.ps-card.is-matched .ps-card__front {
+  box-shadow: 0 0 0 3px var(--accent);
 }
 
 .ps-card__back,
