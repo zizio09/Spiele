@@ -187,23 +187,78 @@ button {
   flex: 1;
   display: grid;
   grid-template-rows: auto minmax(0, 1fr);
-  gap: 0.45rem;
+  gap: 0.65rem;
   min-height: calc(100dvh - 7.5rem);
 }
 
+.spiele-banner {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border-radius: 14px;
+  min-height: clamp(9.5rem, 22vh, 14rem);
+  display: grid;
+  align-items: end;
+  color: #14231c;
+}
+
+.spiele-banner__media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.spiele-banner__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 62% 35%;
+  display: block;
+}
+
+.spiele-banner__shade {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(
+      105deg,
+      rgba(238, 245, 240, 0.94) 0%,
+      rgba(238, 245, 240, 0.82) 34%,
+      rgba(238, 245, 240, 0.28) 58%,
+      rgba(20, 53, 40, 0.12) 100%
+    ),
+    linear-gradient(180deg, rgba(238, 245, 240, 0.2), rgba(20, 53, 40, 0.28));
+}
+
 .spiele-header {
+  position: relative;
+  z-index: 2;
   text-align: left;
   margin: 0;
+  padding: 1rem 1.15rem 1.1rem;
+  max-width: min(28rem, 58%);
 }
 
 .spiele-header__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 3.5vw, 2.6rem);
+  font-size: clamp(2.2rem, 5vw, 3.2rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
-  color: var(--ink);
+  color: #0f1a14;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.spiele-header__lead {
+  margin: 0.4rem 0 0;
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
+  line-height: 1.35;
+  color: #24352c;
+  font-weight: 600;
+  max-width: 22ch;
 }
 
 .spiele-grid {
@@ -442,6 +497,15 @@ button {
   .home--spiele {
     min-height: 0;
   }
+
+  .spiele-header {
+    max-width: 78%;
+    padding: 0.85rem 0.9rem 0.95rem;
+  }
+
+  .spiele-banner__media img {
+    object-position: 72% 30%;
+  }
 }
 
 .btn--xl {
@@ -488,17 +552,34 @@ button {
   transform: translateY(-1px);
 }
 
+.section-lead,
+.game-header p {
+  margin: 0 auto 1.25rem;
+  color: var(--ink-soft);
+  max-width: 42ch;
+  text-align: center;
+}
+
+.game-header {
+  text-align: center;
+  width: min(720px, 100%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
 .game-header h1 {
   font-family: var(--font-display);
   margin: 0 0 0.4rem;
   letter-spacing: -0.02em;
+  text-align: center;
+  width: 100%;
+  font-size: clamp(1.55rem, 3vw, 2rem);
 }
 
-.section-lead,
-.game-header p {
-  margin: 0 0 1.25rem;
-  color: var(--ink-soft);
-  max-width: 52ch;
+.game-header--compact p {
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
 }
 
 .celebration-actions {
@@ -514,30 +595,12 @@ button {
   flex: 1 1 10rem;
 }
 
-.home .hero {
-  display: none;
-}
-
 .game-page {
   display: grid;
   gap: 0.65rem;
   justify-items: center;
   width: 100%;
   flex: 1;
-}
-
-.game-header {
-  text-align: center;
-  width: min(720px, 100%);
-}
-
-.game-header--compact p {
-  margin-bottom: 0.35rem;
-  font-size: 1rem;
-}
-
-.game-header h1 {
-  font-size: clamp(1.55rem, 3vw, 2rem);
 }
 
 .game-message,
@@ -1079,17 +1142,25 @@ button {
 }
 
 .vk-title-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: 2.4rem auto 2.4rem;
   align-items: center;
-  justify-content: center;
-  gap: 0.6rem;
+  justify-items: center;
+  gap: 0.55rem;
+  width: max-content;
+  max-width: 100%;
+  margin: 0 auto;
 }
 
 .vk-title-row h1 {
   margin: 0;
+  grid-column: 2;
+  text-align: center;
 }
 
 .vk-settings-btn {
+  grid-column: 3;
+  justify-self: end;
   width: 2.4rem;
   height: 2.4rem;
   border-radius: 999px;

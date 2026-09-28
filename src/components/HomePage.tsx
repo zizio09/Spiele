@@ -44,7 +44,10 @@ function WordleArt() {
   return (
     <div className="game-card__symbol game-card__symbol--wordle" aria-hidden="true">
       {cells.map((letter, i) => (
-        <span key={i} className={`game-card__tile ${letter ? 'has-letter' : ''} ${letter === 'E' ? 'is-accent' : ''}`}>
+        <span
+          key={i}
+          className={`game-card__tile ${letter ? 'has-letter' : ''} ${letter === 'E' ? 'is-accent' : ''}`}
+        >
           {letter}
         </span>
       ))}
@@ -53,9 +56,7 @@ function WordleArt() {
 }
 
 function ViererketteArt() {
-  const shades = [
-    3, 2, 1, 0, 2, 3, 0, 1, 1, 0, 3, 2, 0, 1, 2, 3,
-  ]
+  const shades = [3, 2, 1, 0, 2, 3, 0, 1, 1, 0, 3, 2, 0, 1, 2, 3]
   return (
     <div className="game-card__symbol game-card__symbol--viererkette" aria-hidden="true">
       {shades.map((shade, i) => (
@@ -107,13 +108,30 @@ function GameArt({ tone }: { tone: GameCard['tone'] }) {
 export function HomePage() {
   return (
     <div className="home home--spiele">
-      <header className="spiele-header">
-        <h1 id="spiele-title" className="spiele-header__title">
-          Spiele
-        </h1>
-      </header>
+      <section className="spiele-banner" aria-labelledby="spiele-title">
+        <div className="spiele-banner__media" aria-hidden="true">
+          <picture>
+            <source srcSet="/images/home-banner.webp" type="image/webp" />
+            <img
+              src="/images/home-banner.jpg"
+              alt=""
+              width={1600}
+              height={900}
+              decoding="async"
+              fetchPriority="high"
+            />
+          </picture>
+        </div>
+        <div className="spiele-banner__shade" aria-hidden="true" />
+        <header className="spiele-header">
+          <h1 id="spiele-title" className="spiele-header__title">
+            Spiele
+          </h1>
+          <p className="spiele-header__lead">Vier Tagesrätsel – groß, klar und ohne Werbung.</p>
+        </header>
+      </section>
 
-      <section className="spiele-grid" aria-labelledby="spiele-title">
+      <section className="spiele-grid" aria-label="Spielauswahl">
         <ul className="spiele-grid__list">
           {GAMES.map((game) => (
             <li key={game.to}>
