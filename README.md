@@ -36,6 +36,13 @@ npm run optimize:celebrations
 
 **Animation prüfen ohne Spiel:** [http://127.0.0.1:43141/dev/celebration](http://127.0.0.1:43141/dev/celebration)
 
+Automatischer Sichtcheck (Pixel-Diff der Frames, Preview muss laufen):
+
+```bash
+npm run preview -- --host 127.0.0.1 --port 43141
+npm run verify:wag
+```
+
 ## Produktion auf dem Raspberry Pi
 
 1. Repository nach `/var/www/spiele` klonen oder den Inhalt dorthin kopieren.
