@@ -89,11 +89,11 @@ button {
 }
 
 .site-header__inner {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0.85rem 1.25rem;
+  padding: 0.55rem 1rem;
   display: grid;
-  gap: 0.65rem;
+  gap: 0.45rem;
   align-items: center;
 }
 
@@ -155,64 +155,60 @@ button {
 
 .main {
   flex: 1;
-  width: min(1100px, 100%);
+  width: min(1200px, 100%);
   margin: 0 auto;
-  padding: 1.5rem 1.25rem 3rem;
+  padding: 0.85rem 1rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .main--home {
-  width: min(1100px, 100%);
+  width: min(1280px, 100%);
   max-width: none;
-  padding: 1rem 1.25rem 2rem;
+  padding: 0.45rem 0.75rem 0.65rem;
+  flex: 1;
 }
 
 .site-footer {
   border-top: 1px solid var(--line);
-  padding: 1.25rem;
+  padding: 0.65rem 1rem;
   text-align: center;
   color: var(--ink-soft);
-  font-size: 0.9rem;
+  font-size: 0.85rem;
 }
 
 .site-footer p {
   margin: 0;
 }
 
-/* —— Home: Spiele cards —— */
+/* —— Home: Spiele cards (fill viewport) —— */
 .home--spiele {
+  flex: 1;
   display: grid;
-  gap: 1rem;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 0.45rem;
+  min-height: calc(100dvh - 7.5rem);
 }
 
 .spiele-header {
   text-align: left;
-  margin-bottom: 0.35rem;
-}
-
-.spiele-header__brand {
   margin: 0;
-  font-family: var(--font-display);
-  font-size: 1.05rem;
-  font-weight: 700;
-  color: var(--bg-deep);
-  letter-spacing: -0.02em;
 }
 
 .spiele-header__title {
-  margin: 0.15rem 0 0.35rem;
+  margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(2.4rem, 5vw, 3.4rem);
+  font-size: clamp(1.85rem, 3.5vw, 2.6rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1;
   color: var(--ink);
 }
 
-.spiele-header__lead {
-  margin: 0;
-  max-width: 42ch;
-  font-size: 1.05rem;
-  color: var(--ink-soft);
+.spiele-grid {
+  min-height: 0;
+  height: 100%;
 }
 
 .spiele-grid__list {
@@ -221,53 +217,64 @@ button {
   padding: 0;
   display: grid;
   grid-template-columns: 1fr;
-  gap: 0.85rem;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+  gap: 0.55rem;
+  height: 100%;
+  min-height: 0;
 }
 
 @media (min-width: 780px) {
   .spiele-grid__list {
     grid-template-columns: 1fr 1fr;
-    gap: 1rem;
+    grid-template-rows: 1fr 1fr;
+    gap: 0.7rem;
   }
+}
+
+.spiele-grid__list > li {
+  min-height: 0;
+  display: flex;
 }
 
 .game-card {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(7.5rem, 0.85fr);
-  min-height: 11.5rem;
-  border-radius: 4px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(7rem, 0.8fr);
+  flex: 1;
+  min-height: 0;
+  border-radius: 6px;
   overflow: hidden;
   background: #fff;
   border: 1px solid rgba(20, 53, 40, 0.12);
-  box-shadow: 0 10px 28px rgba(20, 53, 40, 0.08);
+  box-shadow: 0 8px 22px rgba(20, 53, 40, 0.08);
   color: inherit;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .game-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 16px 36px rgba(20, 53, 40, 0.12);
+  box-shadow: 0 14px 32px rgba(20, 53, 40, 0.12);
 }
 
 .game-card__body {
   display: grid;
   align-content: center;
-  gap: 0.35rem;
-  padding: 1rem 1.15rem 1.1rem;
+  gap: 0.3rem;
+  padding: 0.85rem 1rem;
+  min-width: 0;
 }
 
 .game-card__hint {
   margin: 0;
-  font-size: 0.92rem;
+  font-size: clamp(0.88rem, 1.4vw, 1.02rem);
   font-weight: 600;
   color: var(--ink);
-  line-height: 1.3;
+  line-height: 1.25;
 }
 
 .game-card__title {
   margin: 0;
   font-family: var(--font-display);
-  font-size: clamp(1.85rem, 3.2vw, 2.45rem);
+  font-size: clamp(1.7rem, 3.4vw, 2.55rem);
   font-weight: 700;
   letter-spacing: -0.03em;
   line-height: 1.05;
@@ -275,16 +282,17 @@ button {
 }
 
 .game-card__text {
-  margin: 0.15rem 0 0;
-  font-size: 0.98rem;
-  line-height: 1.4;
+  margin: 0.1rem 0 0;
+  font-size: clamp(0.9rem, 1.35vw, 1.05rem);
+  line-height: 1.35;
   color: var(--ink-soft);
 }
 
 .game-card__art {
   display: grid;
   place-items: center;
-  padding: 0.85rem;
+  padding: 0.65rem;
+  min-height: 0;
 }
 
 .game-card--wordle .game-card__art {
@@ -420,11 +428,19 @@ button {
 @media (max-width: 560px) {
   .game-card {
     grid-template-columns: 1fr;
-    min-height: 0;
   }
 
   .game-card__art {
-    min-height: 7rem;
+    min-height: 5.5rem;
+  }
+
+  .spiele-grid__list {
+    grid-template-rows: none;
+    height: auto;
+  }
+
+  .home--spiele {
+    min-height: 0;
   }
 }
 
@@ -504,13 +520,24 @@ button {
 
 .game-page {
   display: grid;
-  gap: 1rem;
+  gap: 0.65rem;
   justify-items: center;
+  width: 100%;
+  flex: 1;
 }
 
 .game-header {
   text-align: center;
-  width: min(640px, 100%);
+  width: min(720px, 100%);
+}
+
+.game-header--compact p {
+  margin-bottom: 0.35rem;
+  font-size: 1rem;
+}
+
+.game-header h1 {
+  font-size: clamp(1.55rem, 3vw, 2rem);
 }
 
 .game-message,
@@ -719,29 +746,32 @@ button {
 
 .wordle-board {
   display: grid;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  width: min(520px, 100%);
+  margin: 0.15rem auto;
 }
 
 .wordle-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(48px, 58px));
-  gap: 0.4rem;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.5rem;
 }
 
 .tile {
   aspect-ratio: 1;
   display: grid;
   place-items: center;
-  border: 2px solid rgba(20, 53, 40, 0.2);
-  border-radius: 8px;
+  border: 3px solid rgba(20, 53, 40, 0.28);
+  border-radius: 10px;
   font-weight: 700;
-  font-size: 1.35rem;
+  font-size: clamp(1.55rem, 5.5vw, 2.15rem);
   text-transform: uppercase;
-  background: rgba(255, 255, 255, 0.65);
+  background: rgba(255, 255, 255, 0.92);
   transition: transform 0.15s ease, background 0.25s ease, color 0.25s ease, box-shadow 0.15s ease;
   padding: 0;
   color: inherit;
   font-family: inherit;
+  min-height: 3.4rem;
 }
 
 .tile:disabled {
@@ -753,14 +783,14 @@ button {
 }
 
 .tile--filled {
-  border-color: rgba(20, 53, 40, 0.45);
+  border-color: rgba(20, 53, 40, 0.55);
   animation: pop 0.12s ease;
 }
 
 .tile--cursor {
-  box-shadow: 0 0 0 3px var(--accent);
+  box-shadow: 0 0 0 4px var(--accent);
   border-color: var(--accent-deep);
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .tile--correct {
@@ -781,48 +811,17 @@ button {
   color: white;
 }
 
-.keyboard {
-  width: min(560px, 100%);
-  display: grid;
-  gap: 0.4rem;
-  margin-top: 0.5rem;
-}
-
-.keyboard__row {
+.wordle-actions {
   display: flex;
-  justify-content: center;
-  gap: 0.3rem;
   flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: center;
+  width: min(420px, 100%);
+  margin-top: 0.35rem;
 }
 
-.key {
-  min-width: 2rem;
-  min-height: 2.8rem;
-  padding: 0.4rem 0.55rem;
-  border: none;
-  border-radius: 8px;
-  background: #d7e3db;
-  font-weight: 700;
-}
-
-.key--wide {
-  min-width: 4.2rem;
-  font-size: 0.85rem;
-}
-
-.key--correct {
-  background: var(--correct);
-  color: white;
-}
-
-.key--present {
-  background: var(--present);
-  color: #1a1608;
-}
-
-.key--absent {
-  background: var(--absent);
-  color: white;
+.wordle-actions__btn {
+  flex: 1 1 9rem;
 }
 
 .vk-toolbar,
@@ -855,10 +854,10 @@ button {
 
 .ps-layout {
   display: grid;
-  grid-template-columns: minmax(11rem, 14rem) minmax(0, 1fr);
-  gap: 1.25rem 1.5rem;
+  grid-template-columns: minmax(10rem, 13rem) minmax(0, 1fr);
+  gap: 1rem 1.25rem;
   align-items: start;
-  width: min(760px, 100%);
+  width: min(900px, 100%);
 }
 
 .ps-found {
@@ -1203,32 +1202,33 @@ button {
 .vk-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.55rem;
-  width: min(640px, 100%);
+  gap: 0.65rem;
+  width: min(720px, 100%);
 }
 
 .vk-tile {
-  min-height: 4.2rem;
-  padding: 0.65rem;
+  min-height: 5rem;
+  padding: 0.75rem 0.55rem;
   border-radius: 12px;
-  border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.8);
-  font-weight: 600;
+  border: 2px solid rgba(20, 53, 40, 0.22);
+  background: rgba(255, 255, 255, 0.92);
+  font-weight: 700;
+  font-size: 1.05rem;
   transition: background 0.2s ease, transform 0.15s ease;
 }
 
 .vk--size-klein .vk-tile {
-  font-size: 0.8rem;
-  min-height: 3.6rem;
+  font-size: 0.9rem;
+  min-height: 4.2rem;
 }
 
 .vk--size-normal .vk-tile {
-  font-size: 0.95rem;
+  font-size: 1.05rem;
 }
 
 .vk--size-gross .vk-tile {
-  font-size: 1.1rem;
-  min-height: 4.8rem;
+  font-size: 1.25rem;
+  min-height: 5.6rem;
 }
 
 .vk-tile.is-selected {
@@ -1240,7 +1240,7 @@ button {
 .vk-solved {
   display: grid;
   gap: 0.55rem;
-  width: min(640px, 100%);
+  width: min(720px, 100%);
 }
 
 .vk-solved__group {
@@ -1357,7 +1357,7 @@ button {
 }
 
 .sudoku-grid {
-  width: min(460px, 100%);
+  width: min(560px, 100%);
   border: 3px solid var(--bg-deep);
   border-radius: 8px;
   overflow: hidden;
@@ -1405,7 +1405,7 @@ button {
 }
 
 .sudoku-value {
-  font-size: clamp(1rem, 3.5vw, 1.35rem);
+  font-size: clamp(1.2rem, 4.2vw, 1.75rem);
 }
 
 .sudoku-notes {
@@ -1413,7 +1413,7 @@ button {
   grid-template-columns: repeat(3, 1fr);
   width: 100%;
   height: 100%;
-  font-size: 0.55rem;
+  font-size: 0.65rem;
   color: var(--ink-soft);
   padding: 2px;
 }
@@ -1426,26 +1426,29 @@ button {
 .digit-pad {
   display: grid;
   grid-template-columns: repeat(9, minmax(0, 1fr));
-  gap: 0.35rem;
-  width: min(460px, 100%);
+  gap: 0.4rem;
+  width: min(560px, 100%);
 }
 
 .digit {
   min-width: 0;
+  min-height: 3rem;
+  font-size: 1.25rem;
+  font-weight: 700;
   padding-inline: 0.2rem;
 }
 
 .sudoku-controls {
   display: grid;
   gap: 0.75rem;
-  width: min(460px, 100%);
+  width: min(560px, 100%);
 }
 
 .ps-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.75rem;
-  width: min(560px, 100%);
+  gap: 0.85rem;
+  width: min(640px, 100%);
   perspective: 900px;
 }
 
@@ -1455,7 +1458,7 @@ button {
   padding: 0;
   background: transparent;
   border-radius: 16px;
-  min-height: 4.5rem;
+  min-height: 5.5rem;
 }
 
 .ps-card__inner {
@@ -1496,7 +1499,7 @@ button {
     linear-gradient(145deg, var(--bg-mid), var(--bg-deep));
   color: #f7faf8;
   font-family: var(--font-display);
-  font-size: clamp(1.8rem, 6vw, 2.6rem);
+  font-size: clamp(2.2rem, 7vw, 3.2rem);
   font-weight: 700;
 }
 
@@ -1551,17 +1554,17 @@ button {
 
 @media (max-width: 560px) {
   .wordle-row {
-    grid-template-columns: repeat(5, minmax(40px, 1fr));
+    gap: 0.35rem;
   }
 
-  .key {
-    min-width: 1.7rem;
-    min-height: 2.5rem;
-    font-size: 0.85rem;
+  .tile {
+    min-height: 2.9rem;
+    font-size: clamp(1.25rem, 7vw, 1.7rem);
+    border-width: 2px;
   }
 
   .vk-tile {
-    min-height: 3.6rem;
-    font-size: 0.85rem;
+    min-height: 4.2rem;
+    font-size: 0.95rem;
   }
 }

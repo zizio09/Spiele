@@ -7,7 +7,6 @@ import {
   WORD_LENGTH,
   addLetter,
   createExtraWordleState,
-  keyStatuses,
   loadWordleState,
   persistWordleState,
   removeLetter,
@@ -17,8 +16,6 @@ import {
   type LetterMark,
   type WordleState,
 } from './wordleLogic'
-
-const ROWS = ['QWERTZUIOP', 'ASDFGHJKL', 'ENTERZXCVBNM⌫']
 
 function markClass(mark: LetterMark): string {
   switch (mark) {
@@ -72,14 +69,8 @@ export function WordlePage() {
     return () => window.removeEventListener('keydown', onKey)
   }, [])
 
-  const keys = keyStatuses(state.guesses, state.answer)
   const activeRow = state.status === 'playing' ? state.guesses.length : -1
-
-  const onVirtual = (key: string) => {
-    if (key === 'ENTER') setState((s) => submitGuess(s))
-    else if (key === '⌫') setState((s) => removeLetter(s))
-    else setState((s) => addLetter(s, key))
-  }
+  const playing = state.status === 'playing'
 
   const rows: Array<Array<{ letter: string; mark: LetterMark }>> = []
   for (let i = 0; i < MAX_GUESSES; i++) {
@@ -101,11 +92,11 @@ export function WordlePage() {
 
   return (
     <div className="game-page wordle-page">
-      <header className="game-header">
+      <header className="game-header game-header--compact">
         <h1>Wordle</h1>
         <p>
-          Errate das deutsche Wort mit fünf Buchstaben. Du hast sechs Versuche. Ungültige Wörter
-          zählen nicht. Klicke in der aktuellen Zeile auf eine Position, um dort zu tippen.
+          Errate das deutsche Wort mit fünf Buchstaben – sechs Versuche. Tippe auf der physischen
+          Tastatur. Klicke in der Zeile auf eine Position, um dort zu schreiben.
         </p>
       </header>
 
@@ -174,43 +165,24 @@ export function WordlePage() {
         ))}
       </div>
 
-      <div className="keyboard" aria-label="Bildschirmtastatur">
-        {ROWS.map((row, ri) => (
-          <div className="keyboard__row" key={ri}>
-            {ri === 2 ? (
-              <>
-                <button type="button" className="key key--wide" onClick={() => onVirtual('ENTER')}>
-                  Eingabe
-                </button>
-                {'ZXCVBNM'.split('').map((k) => (
-                  <button
-                    key={k}
-                    type="button"
-                    className={`key key--${keys[k] ?? 'idle'}`}
-                    onClick={() => onVirtual(k)}
-                  >
-                    {k}
-                  </button>
-                ))}
-                <button type="button" className="key key--wide" onClick={() => onVirtual('⌫')}>
-                  Löschen
-                </button>
-              </>
-            ) : (
-              row.split('').map((k) => (
-                <button
-                  key={k}
-                  type="button"
-                  className={`key key--${keys[k] ?? 'idle'}`}
-                  onClick={() => onVirtual(k)}
-                >
-                  {k}
-                </button>
-              ))
-            )}
-          </div>
-        ))}
-      </div>
+      {playing && (
+        <div className="wordle-actions" aria-label="Worteingabe">
+          <button
+            type="button"
+            className="btn btn--primary btn--xl wordle-actions__btn"
+            onClick={() => setState((s) => submitGuess(s))}
+          >
+            Eingabe
+          </button>
+          <button
+            type="button"
+            className="btn btn--ghost btn--xl wordle-actions__btn"
+            onClick={() => setState((s) => removeLetter(s))}
+          >
+            Löschen
+          </button>
+        </div>
+      )}
     </div>
   )
 }

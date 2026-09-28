@@ -108,13 +108,9 @@ export function HomePage() {
   return (
     <div className="home home--spiele">
       <header className="spiele-header">
-        <p className="spiele-header__brand">Tagesrunde</p>
         <h1 id="spiele-title" className="spiele-header__title">
           Spiele
         </h1>
-        <p className="spiele-header__lead">
-          Vier Tagesrätsel – groß, klar und ohne Werbung. Wähle ein Spiel.
-        </p>
       </header>
 
       <section className="spiele-grid" aria-labelledby="spiele-title">
