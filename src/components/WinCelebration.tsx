@@ -67,8 +67,8 @@ export function WinCelebration({ outcome }: Props) {
         className="win-celebration__dog"
         src={FRAMES[reduceMotion ? 1 : frame]}
         alt="Hund wedelt mit dem Schwanz"
-        width={640}
-        height={360}
+        width={1254}
+        height={1254}
         decoding="async"
       />
       <p className="win-celebration__title">{title}</p>
