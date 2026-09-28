@@ -59,7 +59,7 @@ export function WinCelebration({ outcome, forceMotion = false }: Props) {
   const title = outcome === 'won' ? 'Geschafft!' : 'Runde beendet'
   const subtitle =
     outcome === 'won'
-      ? 'Der Hund freut sich mit dir.'
+      ? 'Titan freut sich'
       : 'Beim nächsten Mal klappt’s bestimmt.'
 
   const allowMotion = forceMotion || !reduceMotion
